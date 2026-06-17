@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dedi Vocal Academy (DiVA)</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #F9F7FF;
+  --purple:  #7C3AED;
+  --purple2: #6D28D9;
+  --dark:    #1C1026;
+  --gold:    #F59E0B;
+  --gold2:   #D97706;
+  --green:   #059669;
+  --teal:    #0D9488;
+  --muted:   #6B7280;
+  --border:  #E5E7EB;
+  --card-bg: #FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+
+.blob{position:fixed;border-radius:50%;filter:blur(80px);opacity:.2;pointer-events:none;z-index:0}
+.blob1{width:400px;height:400px;background:var(--purple);top:-120px;right:-100px}
+.blob2{width:350px;height:350px;background:var(--gold);bottom:-80px;left:-80px}
+.blob3{width:200px;height:200px;background:var(--teal);top:45%;left:35%}
+
+header{position:sticky;top:0;z-index:100;background:var(--dark);padding:14px 24px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 16px rgba(0,0,0,.4)}
+.logo-mark{width:40px;height:40px;background:var(--purple);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:20px;color:#fff;flex-shrink:0}
+.logo-text{font-family:'Fredoka One',cursive;font-size:22px;color:#fff}
+.logo-sub{font-size:11px;color:#9CA3AF;letter-spacing:.5px;margin-top:-2px}
+
+.hero{background:linear-gradient(135deg,var(--dark) 0%,#2D1B4E 60%,#3B1F6A 100%);padding:60px 24px 72px;text-align:center;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,.25);border:1px solid rgba(124,58,237,.5);border-radius:999px;padding:6px 18px;font-size:12px;font-weight:700;color:#C4B5FD;letter-spacing:.8px;margin-bottom:22px;text-transform:uppercase}
+.hero h1{font-family:'Fredoka One',cursive;font-size:clamp(34px,7vw,56px);color:#fff;line-height:1.1;margin-bottom:14px}
+.hero h1 span{color:#C4B5FD}
+.hero p{font-size:14px;color:#A78BFA;max-width:400px;margin:0 auto;line-height:1.7}
+.hero-tagline{display:inline-block;margin-top:16px;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.5px;font-style:italic}
+
+main{flex:1;position:relative;z-index:1;padding:0 16px 52px;max-width:520px;margin:0 auto;width:100%}
+
+.section-label{text-align:center;margin:40px 0 22px}
+.section-label h2{font-family:'Fredoka One',cursive;font-size:22px;color:var(--dark);margin-bottom:4px}
+.section-label p{font-size:13px;color:var(--muted)}
+
+.portal-grid{display:flex;flex-direction:column;gap:14px}
+.portal-card{background:var(--card-bg);border-radius:20px;padding:20px 22px;display:flex;align-items:center;gap:16px;cursor:pointer;text-decoration:none;color:inherit;border:2px solid var(--border);transition:all .25s;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.portal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:20px 20px 0 0;transition:height .25s}
+.portal-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.12);border-color:transparent}
+.portal-card:hover::before{height:6px}
+
+.card-admin::before{background:var(--purple)}
+.card-admin:hover{border-color:rgba(124,58,237,.3)}
+.card-guru::before{background:var(--teal)}
+.card-guru:hover{border-color:rgba(13,148,136,.3)}
+.card-murid::before{background:var(--gold)}
+.card-murid:hover{border-color:rgba(245,158,11,.3)}
+
+.card-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.icon-admin{background:#F5F3FF}
+.icon-guru{background:#F0FDFA}
+.icon-murid{background:#FFFBEB}
+
+.card-body{flex:1}
+.card-title{font-weight:800;font-size:16px;margin-bottom:3px}
+.card-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.card-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 10px;border-radius:999px;margin-top:6px;letter-spacing:.5px;text-transform:uppercase}
+.tag-admin{background:#F5F3FF;color:var(--purple)}
+.tag-guru{background:#F0FDFA;color:var(--teal)}
+.tag-murid{background:#FFFBEB;color:var(--gold2)}
+
+.card-arrow{font-size:20px;color:#D1D5DB;transition:all .25s;flex-shrink:0}
+.portal-card:hover .card-arrow{color:var(--purple);transform:translateX(4px)}
+.card-guru:hover .card-arrow{color:var(--teal)}
+.card-murid:hover .card-arrow{color:var(--gold2)}
+
+.info-box{background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:14px;padding:14px 18px;font-size:12px;color:#5B21B6;line-height:1.7;margin-top:22px}
+.info-box strong{color:var(--purple)}
+
+footer{text-align:center;padding:20px;font-size:12px;color:#9CA3AF;background:var(--dark);position:relative;z-index:1}
+footer span{color:#A78BFA}
+</style>
+</head>
+<body>
+
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<header>
+  <div class="logo-mark">D</div>
+  <div>
+    <div class="logo-text">DiVA</div>
+    <div class="logo-sub">Dedi Vocal Academy</div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-badge">🎤 Manajemen Kelas Vokal</div>
+  <h1>Selamat Datang di<br><span>Dedi Vocal Academy</span></h1>
+  <p>Platform manajemen akademi vokal untuk admin, guru, dan murid DiVA.</p>
+  <div class="hero-tagline">✨ Upgrade your voice, be a Diva ✨</div>
+</div>
+
+<main>
+  <div class="section-label">
+    <h2>Pilih Portal Anda</h2>
+    <p>Silakan masuk sesuai peran Anda</p>
+  </div>
+
+  <div class="portal-grid">
+    <a href="admin.html" class="portal-card card-admin">
+      <div class="card-icon icon-admin">🛠️</div>
+      <div class="card-body">
+        <div class="card-title">Portal Admin</div>
+        <div class="card-desc">Kelola data guru &amp; murid, laporan sesi, dan penggajian guru per bulan</div>
+        <span class="card-tag tag-admin">Admin</span>
+      </div>
+      <div class="card-arrow">›</div>
+    </a>
+
+    <a href="guru.html" class="portal-card card-guru">
+      <div class="card-icon icon-guru">🎼</div>
+      <div class="card-body">
+        <div class="card-title">Portal Guru</div>
+        <div class="card-desc">Input laporan sesi per murid dan lihat rekap fee bulanan Anda</div>
+        <span class="card-tag tag-guru">Guru</span>
+      </div>
+      <div class="card-arrow">›</div>
+    </a>
+
+    <a href="ortu.html" class="portal-card card-murid">
+      <div class="card-icon icon-murid">🎤</div>
+      <div class="card-body">
+        <div class="card-title">Portal Murid</div>
+        <div class="card-desc">Lihat jadwal sesi, histori kelas, dan tagihan berdasarkan jumlah sesi</div>
+        <span class="card-tag tag-murid">Murid</span>
+      </div>
+      <div class="card-arrow">›</div>
+    </a>
+  </div>
+
+  <div class="info-box">
+    <strong>Cara Penggunaan:</strong><br>
+    Admin login dengan email &amp; password. Guru login dengan kode unik masing-masing. Murid akses portal lewat link yang diberikan admin.
+  </div>
+</main>
+
+<footer>
+  &copy; 2026 <span>Dedi Vocal Academy (DiVA)</span>. Semua hak dilindungi.
+</footer>
+
+</body>
+</html>

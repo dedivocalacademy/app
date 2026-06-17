@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin – Dedi Vocal Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<script src="api.js"></script>
+<style>
+:root{
+  --bg:#F9F7FF;--purple:#7C3AED;--purple2:#6D28D9;--dark:#1C1026;
+  --gold:#F59E0B;--gold2:#D97706;--green:#059669;--teal:#0D9488;
+  --red:#EF4444;--muted:#6B7280;--border:#E5E7EB;--white:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh}
+a{text-decoration:none;color:inherit}
+input,select,textarea,button{font-family:'Nunito',sans-serif}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,var(--dark) 0%,#2D1B4E 100%);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
+.login-box{background:var(--white);border-radius:24px;padding:36px 32px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,.5);text-align:center}
+.login-mark{width:64px;height:64px;background:var(--purple);border-radius:18px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:30px;color:#fff;margin:0 auto 14px}
+.login-title{font-family:'Fredoka One',cursive;font-size:24px;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.form-group{text-align:left;margin-bottom:14px}
+.form-group label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-group input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-weight:600;color:var(--dark);outline:none;transition:border-color .2s}
+.form-group input:focus{border-color:var(--purple)}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:40px}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted)}
+.btn-login{width:100%;background:var(--purple);color:#fff;border:none;padding:13px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;margin-top:6px}
+.btn-login:hover{background:var(--purple2);transform:translateY(-1px)}
+.login-err{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);display:none;margin-bottom:12px}
+
+/* APP SHELL */
+#appShell{display:none;flex-direction:column;min-height:100vh}
+.app-header{background:var(--dark);height:60px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100;flex-shrink:0}
+.logo-mark{width:36px;height:36px;background:var(--purple);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:18px;color:#fff;flex-shrink:0}
+.app-title{font-family:'Fredoka One',cursive;font-size:18px;color:#fff}
+.app-sub{font-size:11px;color:#9CA3AF;margin-top:-2px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.btn-logout{background:rgba(255,255,255,.1);color:#D1D5DB;border:1px solid rgba(255,255,255,.15);padding:7px 16px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-logout:hover{background:var(--red);color:#fff;border-color:transparent}
+
+/* TABS */
+.tab-nav{background:var(--dark);border-top:1px solid #2D1B4E;padding:0 12px;display:flex;overflow-x:auto;gap:2px;flex-shrink:0;scrollbar-width:none}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:none;color:#9CA3AF;font-size:13px;font-weight:700;padding:12px 16px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all .2s;display:flex;align-items:center;gap:6px}
+.tab-btn:hover{color:#C4B5FD}
+.tab-btn.active{color:#C4B5FD;border-bottom-color:#7C3AED}
+.tab-page{display:none}.tab-page.active{display:block}
+
+.app-content{flex:1;padding:20px;max-width:1200px;margin:0 auto;width:100%}
+.section-card{background:var(--white);border-radius:18px;padding:20px;margin-bottom:18px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.card-head h3{font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:768px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+.stat-card{border-radius:16px;padding:18px;position:relative;overflow:hidden}
+.stat-card .s-icon{font-size:28px;margin-bottom:8px}
+.stat-card .s-val{font-family:'Fredoka One',cursive;font-size:32px;line-height:1}
+.stat-card .s-label{font-size:12px;font-weight:700;margin-top:4px;opacity:.7}
+.sc-purple{background:#F5F3FF;color:var(--purple2)}
+.sc-teal{background:#F0FDFA;color:var(--teal)}
+.sc-green{background:#ECFDF5;color:var(--green)}
+.sc-gold{background:#FFFBEB;color:var(--gold2)}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;min-width:500px}
+thead tr{background:var(--bg)}
+th{padding:10px 14px;font-size:12px;font-weight:700;text-align:left;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:10px 14px;font-size:13px;border-top:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:#FAFAF9}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.badge-green{background:#ECFDF5;color:var(--green)}
+.badge-red{background:#FEF2F2;color:var(--red)}
+.badge-yellow{background:#FFFBEB;color:var(--gold2)}
+.badge-purple{background:#F5F3FF;color:var(--purple2)}
+.badge-teal{background:#F0FDFA;color:var(--teal)}
+.badge-gray{background:#F3F4F6;color:var(--muted)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;transition:all .2s}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:8px}
+.btn-primary{background:var(--purple);color:#fff}.btn-primary:hover{background:var(--purple2)}
+.btn-danger{background:#FEF2F2;color:var(--red);border:1px solid #FECACA}.btn-danger:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.btn-teal{background:#F0FDFA;color:var(--teal);border:1px solid #CCFBF1}.btn-teal:hover{background:var(--teal);color:#fff}
+.btn-green{background:#ECFDF5;color:var(--green);border:1px solid #A7F3D0}.btn-green:hover{background:var(--green);color:#fff}
+.btn-dark{background:var(--dark);color:#fff}.btn-dark:hover{background:#2D1B4E}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:var(--gold2)}
+
+/* FORMS */
+.add-form{background:var(--bg);border:2px dashed var(--border);border-radius:14px;padding:18px;margin-top:14px;display:none}
+.add-form.open{display:block}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:480px){.form-row{grid-template-columns:1fr}}
+.form-field label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.form-field input,.form-field select,.form-field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;color:var(--dark);outline:none;background:var(--white);transition:border-color .2s}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--purple)}
+.form-field textarea{resize:vertical;min-height:80px}
+.form-actions{display:flex;gap:8px;margin-top:4px}
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.filter-row select,.filter-row input{padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;background:var(--white);outline:none;color:var(--dark)}
+.filter-row select:focus,.filter-row input:focus{border-color:var(--purple)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--white);border-radius:20px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.modal-title{font-weight:800;font-size:18px;margin-bottom:16px}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--dark);color:#fff;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:700;z-index:9999;transition:transform .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{background:var(--green)}
+#toast.error{background:var(--red)}
+
+.spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(124,58,237,.3);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.empty-state{text-align:center;padding:32px;color:var(--muted);font-size:14px;font-weight:600}
+.kode-display{background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;color:var(--purple);letter-spacing:2px;font-family:monospace}
+.fee-display{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:700;color:var(--dark)}
+.sesi-chip{display:inline-block;background:#EEF2FF;color:#4338CA;border-radius:8px;padding:3px 10px;font-size:11px;font-weight:700;margin:2px}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.summary-row:last-child{border-bottom:none}
+
+/* PENGGAJIAN */
+.gaji-bulan-card{background:linear-gradient(135deg,var(--purple) 0%,var(--purple2) 100%);border-radius:16px;padding:20px;color:#fff;margin-bottom:18px}
+.gaji-bulan-title{font-size:13px;opacity:.8;margin-bottom:4px}
+.gaji-bulan-val{font-family:'Fredoka One',cursive;font-size:32px}
+.gaji-guru-row{display:flex;align-items:center;justify-content:space-between;padding:14px;border:1.5px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--white)}
+.gaji-guru-name{font-weight:800;font-size:14px}
+.gaji-guru-detail{font-size:12px;color:var(--muted);margin-top:2px}
+.gaji-guru-amount{font-family:'Fredoka One',cursive;font-size:22px;color:var(--purple2)}
+
+/* PROGRAM BADGE */
+.prog-online{background:#EEF2FF;color:#4338CA}
+.prog-regular{background:#F0FDFA;color:var(--teal)}
+.prog-home{background:#FFF7ED;color:#C2410C}
+.prog-group{background:#F0FDF4;color:#166534}
+.prog-choir{background:#FDF4FF;color:#7E22CE}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-mark">D</div>
+    <div class="login-title">Panel Admin</div>
+    <div class="login-sub">Dedi Vocal Academy (DiVA)</div>
+    <div class="login-err" id="loginErr">Email atau password salah.</div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="text" id="emailInput" placeholder="Username..." onkeydown="if(event.key==='Enter')document.getElementById('pwInput').focus()">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="pwInput" placeholder="Password..." onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="pw-eye" onclick="togglePw()">👁</button>
+      </div>
+    </div>
+    <button class="btn-login" onclick="doLogin()">Masuk →</button>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="appShell">
+  <header class="app-header">
+    <div class="logo-mark">D</div>
+    <div><div class="app-title">DiVA</div><div class="app-sub">Panel Admin</div></div>
+    <div class="header-right">
+      <button class="btn-logout" onclick="doLogout()">Keluar</button>
+    </div>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+    <button class="tab-btn" onclick="showTab('guru',this)">👩‍🏫 Guru</button>
+    <button class="tab-btn" onclick="showTab('murid',this)">👨‍🎓 Murid</button>
+    <button class="tab-btn" onclick="showTab('laporan',this)">📋 Laporan Sesi</button>
+    <button class="tab-btn" onclick="showTab('penggajian',this)">💰 Penggajian</button>
+  </div>
+
+  <div class="app-content">
+
+    <!-- DASHBOARD -->
+    <div class="tab-page active" id="tab-dashboard">
+      <div class="grid-4" style="margin-bottom:18px">
+        <div class="stat-card sc-purple"><div class="s-icon">👨‍🎓</div><div class="s-val" id="dashTotalMurid">–</div><div class="s-label">Total Murid</div></div>
+        <div class="stat-card sc-teal"><div class="s-icon">👩‍🏫</div><div class="s-val" id="dashTotalGuru">–</div><div class="s-label">Total Guru</div></div>
+        <div class="stat-card sc-green"><div class="s-icon">📅</div><div class="s-val" id="dashSesiBulanIni">–</div><div class="s-label">Sesi Bulan Ini</div></div>
+        <div class="stat-card sc-gold"><div class="s-icon">💰</div><div class="s-val" id="dashTotalFee">–</div><div class="s-label">Total Fee Bulan Ini</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="section-card">
+          <div class="card-head"><h3>📊 Sesi Per Program (Bulan Ini)</h3></div>
+          <div id="dashProgramStats"><span class="spinner"></span></div>
+        </div>
+        <div class="section-card">
+          <div class="card-head"><h3>👩‍🏫 Rekap Guru (Bulan Ini)</h3></div>
+          <div id="dashGuruRekap"><span class="spinner"></span></div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="card-head"><h3>⚡ Aksi Cepat</h3></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">
+          <div onclick="showTab('guru',document.querySelectorAll('.tab-btn')[1])" style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;font-size:12px;font-weight:700" onmouseover="this.style.borderColor='#7C3AED'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:24px;margin-bottom:6px">👩‍🏫</div>Tambah Guru</div>
+          <div onclick="showTab('murid',document.querySelectorAll('.tab-btn')[2])" style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;font-size:12px;font-weight:700" onmouseover="this.style.borderColor='#7C3AED'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:24px;margin-bottom:6px">👨‍🎓</div>Tambah Murid</div>
+          <div onclick="showTab('laporan',document.querySelectorAll('.tab-btn')[3])" style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;font-size:12px;font-weight:700" onmouseover="this.style.borderColor='#7C3AED'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:24px;margin-bottom:6px">📋</div>Laporan Sesi</div>
+          <div onclick="showTab('penggajian',document.querySelectorAll('.tab-btn')[4])" style="background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;font-size:12px;font-weight:700" onmouseover="this.style.borderColor='#7C3AED'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:24px;margin-bottom:6px">💰</div>Penggajian</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GURU -->
+    <div class="tab-page" id="tab-guru">
+      <div class="section-card">
+        <div class="card-head">
+          <h3>👩‍🏫 Data Guru</h3>
+          <button class="btn btn-primary" onclick="toggleForm('form-guru')">➕ Tambah Guru</button>
+        </div>
+
+        <div class="add-form" id="form-guru">
+          <h4 style="margin-bottom:14px;font-size:14px;font-weight:800">Tambah Guru Baru</h4>
+          <div class="form-row">
+            <div class="form-field"><label>Nama Guru</label><input type="text" id="fGuruNama" placeholder="Nama lengkap..."></div>
+            <div class="form-field"><label>Kode Login Guru</label><input type="text" id="fGuruKode" placeholder="Cth: GURU01" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-field"><label>Fee per Pertemuan (Rp)</label><input type="number" id="fGuruFee" placeholder="150000" min="0"></div>
+            <div class="form-field"><label>Status</label>
+              <select id="fGuruAktif">
+                <option value="aktif">Aktif</option>
+                <option value="nonaktif">Nonaktif</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveGuru()">💾 Simpan</button>
+            <button class="btn btn-dark" onclick="toggleForm('form-guru')">Batal</button>
+          </div>
+        </div>
+
+        <div class="table-wrap" style="margin-top:14px">
+          <table>
+            <thead><tr><th>Nama Guru</th><th>Kode Login</th><th>Fee/Pertemuan</th><th>Jumlah Murid</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="guruTbody"><tr><td colspan="6" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MURID -->
+    <div class="tab-page" id="tab-murid">
+      <div class="grid-3" style="margin-bottom:18px">
+        <div class="stat-card sc-purple"><div class="s-icon">👥</div><div class="s-val" id="muridTotal">–</div><div class="s-label">Total Murid</div></div>
+        <div class="stat-card sc-green"><div class="s-icon">✅</div><div class="s-val" id="muridAktif">–</div><div class="s-label">Aktif</div></div>
+        <div class="stat-card sc-gold"><div class="s-icon">⏸</div><div class="s-val" id="muridNonaktif">–</div><div class="s-label">Nonaktif</div></div>
+      </div>
+
+      <div class="section-card">
+        <div class="card-head">
+          <h3>👨‍🎓 Data Murid</h3>
+          <button class="btn btn-primary" onclick="toggleForm('form-murid')">➕ Tambah Murid</button>
+        </div>
+
+        <div class="add-form" id="form-murid">
+          <h4 style="margin-bottom:14px;font-size:14px;font-weight:800">Tambah Murid Baru</h4>
+          <div class="form-row">
+            <div class="form-field"><label>Nama Murid</label><input type="text" id="fMuridNama" placeholder="Nama lengkap..."></div>
+            <div class="form-field"><label>No. HP</label><input type="tel" id="fMuridHp" placeholder="08xxx..."></div>
+          </div>
+          <div class="form-row">
+            <div class="form-field"><label>Program</label>
+              <select id="fMuridProgram">
+                <option value="Vocal Online">Vocal Online</option>
+                <option value="Vocal Regular">Vocal Regular</option>
+                <option value="Vocal Home">Vocal Home</option>
+                <option value="Vocal Group Reguler">Vocal Group Reguler</option>
+                <option value="Vocal Group Home">Vocal Group Home</option>
+                <option value="Choir">Choir</option>
+              </select>
+            </div>
+            <div class="form-field"><label>Rate per Sesi (Rp)</label><input type="number" id="fMuridRate" placeholder="200000" min="0"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-field"><label>Guru Tetap</label><select id="fMuridGuru"><option value="">Pilih Guru...</option></select></div>
+            <div class="form-field"><label>Status</label>
+              <select id="fMuridAktif">
+                <option value="aktif">Aktif</option>
+                <option value="nonaktif">Nonaktif</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field"><label>Nominal SPP (Rp)</label><input type="number" id="fMuridSppNominal" placeholder="0" min="0"></div>
+            <div class="form-field"><label>Tgl Bayar SPP</label><input type="date" id="fMuridSppTgl"></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveMurid()">💾 Simpan</button>
+            <button class="btn btn-dark" onclick="toggleForm('form-murid')">Batal</button>
+          </div>
+        </div>
+
+        <div class="filter-row" style="margin-top:14px">
+          <select id="filterMuridProgram" onchange="renderMuridTable()">
+            <option value="">Semua Program</option>
+            <option>Vocal Online</option>
+            <option>Vocal Regular</option>
+            <option>Vocal Home</option>
+            <option>Vocal Group Reguler</option>
+            <option>Vocal Group Home</option>
+            <option>Choir</option>
+          </select>
+          <select id="filterMuridGuru" onchange="renderMuridTable()"><option value="">Semua Guru</option></select>
+          <input type="text" id="filterMuridNama" placeholder="Cari nama..." oninput="renderMuridTable()" style="max-width:200px">
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nama Murid</th><th>Program</th><th>Guru</th><th>Rate/Sesi</th><th>No. HP</th><th>SPP</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="muridTbody"><tr><td colspan="8" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- LAPORAN SESI -->
+    <div class="tab-page" id="tab-laporan">
+      <div class="section-card">
+        <div class="card-head">
+          <h3>📋 Laporan Sesi dari Guru</h3>
+        </div>
+        <div class="filter-row">
+          <input type="month" id="filterLaporanBulan">
+          <select id="filterLaporanGuru"><option value="">Semua Guru</option></select>
+          <select id="filterLaporanMurid"><option value="">Semua Murid</option></select>
+          <button class="btn btn-dark" onclick="loadLaporan()">🔍 Filter</button>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:16px" id="laporanStats">
+          <div class="stat-card sc-purple"><div class="s-icon">📅</div><div class="s-val" id="lStatSesi">–</div><div class="s-label">Total Sesi</div></div>
+          <div class="stat-card sc-teal"><div class="s-icon">👥</div><div class="s-val" id="lStatMurid">–</div><div class="s-label">Murid Aktif</div></div>
+          <div class="stat-card sc-gold"><div class="s-icon">💰</div><div class="s-val" id="lStatPendapatan">–</div><div class="s-label">Est. Pendapatan</div></div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tanggal</th><th>Guru</th><th>Murid</th><th>Program</th><th>Catatan</th><th>Aksi</th></tr></thead>
+            <tbody id="laporanTbody"><tr><td colspan="6" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENGGAJIAN -->
+    <div class="tab-page" id="tab-penggajian">
+      <div class="section-card">
+        <div class="card-head">
+          <h3>💰 Rekap Penggajian Guru</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="month" id="penggajianBulan" onchange="loadPenggajian()">
+            <button class="btn btn-primary" onclick="loadPenggajian()">🔄 Refresh</button>
+          </div>
+        </div>
+
+        <div id="penggajianContent">
+          <div class="gaji-bulan-card">
+            <div class="gaji-bulan-title">Total Fee Guru Bulan Ini</div>
+            <div class="gaji-bulan-val" id="totalFeeBulan">Rp –</div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nama Guru</th><th>Total Sesi</th><th>Fee/Sesi</th><th>Total Fee</th><th>Detail Sesi</th></tr></thead>
+              <tbody id="penggajianTbody"><tr><td colspan="5" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL EDIT GURU -->
+<div class="modal-overlay" id="modalEditGuru">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modalEditGuru')">✕</button>
+    <div class="modal-title">Edit Guru</div>
+    <input type="hidden" id="editGuruId">
+    <div class="form-row">
+      <div class="form-field"><label>Nama Guru</label><input type="text" id="editGuruNama"></div>
+      <div class="form-field"><label>Kode Login</label><input type="text" id="editGuruKode" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label>Fee per Pertemuan (Rp)</label><input type="number" id="editGuruFee"></div>
+      <div class="form-field"><label>Status</label><select id="editGuruAktif"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="updateGuru()">💾 Simpan</button>
+      <button class="btn btn-dark" onclick="closeModal('modalEditGuru')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT MURID -->
+<div class="modal-overlay" id="modalEditMurid">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modalEditMurid')">✕</button>
+    <div class="modal-title">Edit Murid</div>
+    <input type="hidden" id="editMuridId">
+    <div class="form-row">
+      <div class="form-field"><label>Nama Murid</label><input type="text" id="editMuridNama"></div>
+      <div class="form-field"><label>No. HP</label><input type="tel" id="editMuridHp"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label>Program</label>
+        <select id="editMuridProgram">
+          <option>Vocal Online</option><option>Vocal Regular</option><option>Vocal Home</option>
+          <option>Vocal Group Reguler</option><option>Vocal Group Home</option><option>Choir</option>
+        </select>
+      </div>
+      <div class="form-field"><label>Rate per Sesi (Rp)</label><input type="number" id="editMuridRate"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label>Guru Tetap</label><select id="editMuridGuru"></select></div>
+      <div class="form-field"><label>Status</label><select id="editMuridAktif"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label>Nominal SPP (Rp)</label><input type="number" id="editMuridSppNominal"></div>
+      <div class="form-field"><label>Tgl Bayar SPP</label><input type="date" id="editMuridSppTgl"></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Link Portal Murid</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="editMuridLinkId" readonly style="background:var(--bg);cursor:default;font-family:monospace;font-size:12px">
+        <button class="btn btn-teal btn-sm" onclick="copyLink()">📋 Copy Link</button>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="updateMurid()">💾 Simpan</button>
+      <button class="btn btn-dark" onclick="closeModal('modalEditMurid')">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL SESI GURU -->
+<div class="modal-overlay" id="modalDetailSesi">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modalDetailSesi')">✕</button>
+    <div class="modal-title" id="detailSesiTitle">Detail Sesi</div>
+    <div id="detailSesiContent"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ─── AUTH ───────────────────────────────────────────
+const ADMIN_EMAIL = '123456';
+const ADMIN_PASS  = '123456';
+
+function doLogin() {
+  const email = document.getElementById('emailInput').value.trim();
+  const pw    = document.getElementById('pwInput').value;
+  const err   = document.getElementById('loginErr');
+  if (email === ADMIN_EMAIL && pw === ADMIN_PASS) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').style.display = 'flex';
+    err.style.display = 'none';
+    initApp();
+  } else {
+    err.style.display = 'block';
+  }
+}
+function doLogout() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appShell').style.display   = 'none';
+  document.getElementById('emailInput').value = '';
+  document.getElementById('pwInput').value    = '';
+}
+function togglePw() {
+  const inp = document.getElementById('pwInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// ─── TABS ───────────────────────────────────────────
+const tabLoaded = {};
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (!tabLoaded[id]) { tabLoaded[id] = true; loadTab(id); }
+}
+function loadTab(id) {
+  if (id === 'dashboard') loadDashboard();
+  if (id === 'guru')      loadGuru();
+  if (id === 'murid')     loadMurid();
+  if (id === 'laporan')   initLaporan();
+  if (id === 'penggajian') initPenggajian();
+}
+
+// ─── TOAST ──────────────────────────────────────────
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+}
+
+// ─── HELPERS ────────────────────────────────────────
+function fmt(n) {
+  if (n == null || n === '') return '–';
+  return 'Rp ' + Number(n).toLocaleString('id-ID');
+}
+function thisBulan() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+function toggleForm(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function progBadgeClass(prog) {
+  if (!prog) return '';
+  const p = prog.toLowerCase();
+  if (p.includes('online'))  return 'prog-online';
+  if (p.includes('home'))    return 'prog-home';
+  if (p.includes('group'))   return 'prog-group';
+  if (p.includes('choir'))   return 'prog-choir';
+  return 'prog-regular';
+}
+
+// ─── INIT ───────────────────────────────────────────
+let allGuru  = [];
+let allMurid = [];
+
+function initApp() {
+  const bulanEl = document.getElementById('penggajianBulan');
+  if (bulanEl) bulanEl.value = thisBulan();
+  const flBulan = document.getElementById('filterLaporanBulan');
+  if (flBulan) flBulan.value = thisBulan();
+  loadDashboard();
+  tabLoaded['dashboard'] = true;
+}
+
+// ─── DASHBOARD ──────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const [guru, murid, sesi] = await Promise.all([
+      API.getGuru(),
+      API.getMurid(),
+      API.getSesi({ bulan: thisBulan() })
+    ]);
+    allGuru  = guru  || [];
+    allMurid = murid || [];
+    const sesiList = sesi || [];
+
+    document.getElementById('dashTotalMurid').textContent   = allMurid.filter(m => m.aktif !== 'nonaktif').length;
+    document.getElementById('dashTotalGuru').textContent    = allGuru.filter(g => g.aktif !== 'nonaktif').length;
+    document.getElementById('dashSesiBulanIni').textContent = sesiList.length;
+
+    // Total fee
+    let totalFee = 0;
+    allGuru.forEach(g => {
+      const cnt = sesiList.filter(s => s.guru_id === g.id).length;
+      totalFee += cnt * (Number(g.fee_per_sesi) || 0);
+    });
+    document.getElementById('dashTotalFee').textContent = 'Rp ' + Math.round(totalFee/1000) + 'rb';
+
+    // Program stats
+    const progMap = {};
+    sesiList.forEach(s => {
+      const m = allMurid.find(x => x.id === s.murid_id);
+      const prog = m ? m.program : 'Unknown';
+      progMap[prog] = (progMap[prog] || 0) + 1;
+    });
+    const progEl = document.getElementById('dashProgramStats');
+    if (!Object.keys(progMap).length) {
+      progEl.innerHTML = '<div class="empty-state">Belum ada sesi bulan ini</div>';
+    } else {
+      progEl.innerHTML = Object.entries(progMap).map(([k,v]) =>
+        `<div class="summary-row"><span>${k}</span><span class="badge badge-purple">${v} sesi</span></div>`
+      ).join('');
+    }
+
+    // Guru rekap
+    const guruEl = document.getElementById('dashGuruRekap');
+    guruEl.innerHTML = allGuru.filter(g => g.aktif !== 'nonaktif').map(g => {
+      const cnt = sesiList.filter(s => s.guru_id === g.id).length;
+      return `<div class="summary-row"><span><b>${g.nama}</b></span><span>${cnt} sesi · ${fmt(cnt * Number(g.fee_per_sesi || 0))}</span></div>`;
+    }).join('') || '<div class="empty-state">Belum ada data guru</div>';
+
+  } catch(e) {
+    console.error(e);
+    toast('Gagal memuat dashboard: ' + e.message, 'error');
+  }
+}
+
+// ─── GURU ───────────────────────────────────────────
+async function loadGuru() {
+  try {
+    allGuru = await API.getGuru() || [];
+    renderGuruTable();
+  } catch(e) {
+    document.getElementById('guruTbody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:red;padding:16px">${e.message}</td></tr>`;
+  }
+}
+
+function renderGuruTable() {
+  const tb = document.getElementById('guruTbody');
+  if (!allGuru.length) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">Belum ada data guru</td></tr>'; return; }
+  tb.innerHTML = allGuru.map(g => {
+    const jumlahMurid = allMurid.filter(m => m.guru_id === g.id).length;
+    const aktifBadge  = g.aktif === 'nonaktif'
+      ? '<span class="badge badge-gray">Nonaktif</span>'
+      : '<span class="badge badge-green">Aktif</span>';
+    return `<tr>
+      <td><b>${g.nama}</b></td>
+      <td><span class="kode-display">${g.kode_login || '–'}</span></td>
+      <td>${fmt(g.fee_per_sesi)}</td>
+      <td>${jumlahMurid} murid</td>
+      <td>${aktifBadge}</td>
+      <td>
+        <button class="btn btn-sm btn-teal" onclick="openEditGuru('${g.id}')">✏️ Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="hapusGuru('${g.id}','${g.nama}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function saveGuru() {
+  const nama  = document.getElementById('fGuruNama').value.trim();
+  const kode  = document.getElementById('fGuruKode').value.trim().toUpperCase();
+  const fee   = document.getElementById('fGuruFee').value;
+  const aktif = document.getElementById('fGuruAktif').value;
+  if (!nama || !kode) return toast('Nama dan Kode wajib diisi', 'error');
+  try {
+    await API.addGuru({ nama, kode_login: kode, fee_per_sesi: fee, aktif });
+    toast('Guru berhasil ditambahkan!', 'success');
+    toggleForm('form-guru');
+    document.getElementById('fGuruNama').value = '';
+    document.getElementById('fGuruKode').value = '';
+    document.getElementById('fGuruFee').value  = '';
+    tabLoaded.murid = false; tabLoaded.dashboard = false;
+    loadGuru();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function openEditGuru(id) {
+  const g = allGuru.find(x => x.id === id);
+  if (!g) return;
+  document.getElementById('editGuruId').value    = g.id;
+  document.getElementById('editGuruNama').value  = g.nama;
+  document.getElementById('editGuruKode').value  = g.kode_login || '';
+  document.getElementById('editGuruFee').value   = g.fee_per_sesi || '';
+  document.getElementById('editGuruAktif').value = g.aktif || 'aktif';
+  openModal('modalEditGuru');
+}
+async function updateGuru() {
+  const id    = document.getElementById('editGuruId').value;
+  const nama  = document.getElementById('editGuruNama').value.trim();
+  const kode  = document.getElementById('editGuruKode').value.trim().toUpperCase();
+  const fee   = document.getElementById('editGuruFee').value;
+  const aktif = document.getElementById('editGuruAktif').value;
+  if (!nama || !kode) return toast('Nama dan Kode wajib diisi', 'error');
+  try {
+    await API.updateGuru({ id, nama, kode_login: kode, fee_per_sesi: fee, aktif });
+    toast('Data guru diperbarui!', 'success');
+    closeModal('modalEditGuru');
+    tabLoaded.dashboard = false;
+    loadGuru();
+  } catch(e) { toast(e.message, 'error'); }
+}
+async function hapusGuru(id, nama) {
+  if (!confirm(`Hapus guru "${nama}"?`)) return;
+  try {
+    await API.deleteGuru(id);
+    toast('Guru dihapus', 'success');
+    loadGuru();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ─── MURID ──────────────────────────────────────────
+async function loadMurid() {
+  try {
+    [allGuru, allMurid] = await Promise.all([API.getGuru(), API.getMurid()]);
+    allGuru  = allGuru  || [];
+    allMurid = allMurid || [];
+
+    // Populate guru dropdowns
+    const opts = allGuru.map(g => `<option value="${g.id}">${g.nama}</option>`).join('');
+    document.getElementById('fMuridGuru').innerHTML   = '<option value="">Pilih Guru...</option>' + opts;
+    document.getElementById('editMuridGuru').innerHTML = '<option value="">Pilih Guru...</option>' + opts;
+    document.getElementById('filterMuridGuru').innerHTML = '<option value="">Semua Guru</option>' + opts;
+
+    const total = allMurid.length;
+    const aktif = allMurid.filter(m => m.aktif !== 'nonaktif').length;
+    document.getElementById('muridTotal').textContent   = total;
+    document.getElementById('muridAktif').textContent   = aktif;
+    document.getElementById('muridNonaktif').textContent = total - aktif;
+
+    renderMuridTable();
+  } catch(e) {
+    document.getElementById('muridTbody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:red;padding:16px">${e.message}</td></tr>`;
+  }
+}
+
+function renderMuridTable() {
+  const progFilter = document.getElementById('filterMuridProgram')?.value || '';
+  const guruFilter = document.getElementById('filterMuridGuru')?.value || '';
+  const namaFilter = (document.getElementById('filterMuridNama')?.value || '').toLowerCase();
+  const tb = document.getElementById('muridTbody');
+
+  let list = allMurid;
+  if (progFilter) list = list.filter(m => m.program === progFilter);
+  if (guruFilter) list = list.filter(m => m.guru_id === guruFilter);
+  if (namaFilter) list = list.filter(m => m.nama.toLowerCase().includes(namaFilter));
+
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="8" class="empty-state">Tidak ada murid</td></tr>'; return; }
+
+  tb.innerHTML = list.map(m => {
+    const guru      = allGuru.find(g => g.id === m.guru_id);
+    const aktifBadge = m.aktif === 'nonaktif'
+      ? '<span class="badge badge-gray">Nonaktif</span>'
+      : '<span class="badge badge-green">Aktif</span>';
+    const sppStatus = m.tgl_bayar_spp
+      ? `<span class="badge badge-green">✓ ${m.tgl_bayar_spp}</span>`
+      : '<span class="badge badge-yellow">Belum</span>';
+    return `<tr>
+      <td><b>${m.nama}</b></td>
+      <td><span class="badge ${progBadgeClass(m.program)}">${m.program || '–'}</span></td>
+      <td>${guru ? guru.nama : '<span style="color:var(--muted)">–</span>'}</td>
+      <td>${fmt(m.rate_per_sesi)}</td>
+      <td>${m.no_hp || '–'}</td>
+      <td>${sppStatus}</td>
+      <td>${aktifBadge}</td>
+      <td>
+        <button class="btn btn-sm btn-teal" onclick="openEditMurid('${m.id}')">✏️ Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="hapusMurid('${m.id}','${m.nama}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function saveMurid() {
+  const data = {
+    nama:          document.getElementById('fMuridNama').value.trim(),
+    no_hp:         document.getElementById('fMuridHp').value.trim(),
+    program:       document.getElementById('fMuridProgram').value,
+    rate_per_sesi: document.getElementById('fMuridRate').value,
+    guru_id:       document.getElementById('fMuridGuru').value,
+    aktif:         document.getElementById('fMuridAktif').value,
+    nominal_spp:   document.getElementById('fMuridSppNominal').value,
+    tgl_bayar_spp: document.getElementById('fMuridSppTgl').value,
+  };
+  if (!data.nama) return toast('Nama murid wajib diisi', 'error');
+  try {
+    await API.addMurid(data);
+    toast('Murid berhasil ditambahkan!', 'success');
+    toggleForm('form-murid');
+    ['fMuridNama','fMuridHp','fMuridRate','fMuridSppNominal','fMuridSppTgl'].forEach(id => document.getElementById(id).value = '');
+    tabLoaded.dashboard = false;
+    loadMurid();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function openEditMurid(id) {
+  const m = allMurid.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('editMuridId').value          = m.id;
+  document.getElementById('editMuridNama').value        = m.nama;
+  document.getElementById('editMuridHp').value          = m.no_hp || '';
+  document.getElementById('editMuridProgram').value     = m.program || 'Vocal Regular';
+  document.getElementById('editMuridRate').value        = m.rate_per_sesi || '';
+  document.getElementById('editMuridGuru').value        = m.guru_id || '';
+  document.getElementById('editMuridAktif').value       = m.aktif || 'aktif';
+  document.getElementById('editMuridSppNominal').value  = m.nominal_spp || '';
+  document.getElementById('editMuridSppTgl').value      = m.tgl_bayar_spp || '';
+  document.getElementById('editMuridLinkId').value      = m.link_id || '';
+  openModal('modalEditMurid');
+}
+function copyLink() {
+  const linkId = document.getElementById('editMuridLinkId').value;
+  const url    = location.origin + location.pathname.replace('admin.html','ortu.html') + '?id=' + linkId;
+  navigator.clipboard.writeText(url).then(() => toast('Link disalin!', 'success'));
+}
+async function updateMurid() {
+  const id = document.getElementById('editMuridId').value;
+  const data = {
+    id,
+    nama:          document.getElementById('editMuridNama').value.trim(),
+    no_hp:         document.getElementById('editMuridHp').value.trim(),
+    program:       document.getElementById('editMuridProgram').value,
+    rate_per_sesi: document.getElementById('editMuridRate').value,
+    guru_id:       document.getElementById('editMuridGuru').value,
+    aktif:         document.getElementById('editMuridAktif').value,
+    nominal_spp:   document.getElementById('editMuridSppNominal').value,
+    tgl_bayar_spp: document.getElementById('editMuridSppTgl').value,
+  };
+  if (!data.nama) return toast('Nama murid wajib diisi', 'error');
+  try {
+    await API.updateMurid(data);
+    toast('Data murid diperbarui!', 'success');
+    closeModal('modalEditMurid');
+    tabLoaded.dashboard = false;
+    loadMurid();
+  } catch(e) { toast(e.message, 'error'); }
+}
+async function hapusMurid(id, nama) {
+  if (!confirm(`Hapus murid "${nama}"?`)) return;
+  try {
+    await API.deleteMurid(id);
+    toast('Murid dihapus', 'success');
+    loadMurid();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ─── LAPORAN SESI ───────────────────────────────────
+async function initLaporan() {
+  if (!allGuru.length || !allMurid.length) {
+    [allGuru, allMurid] = await Promise.all([API.getGuru(), API.getMurid()]);
+    allGuru  = allGuru  || [];
+    allMurid = allMurid || [];
+  }
+  // Populate filter dropdowns
+  const gOpts = allGuru.map(g  => `<option value="${g.id}">${g.nama}</option>`).join('');
+  const mOpts = allMurid.map(m => `<option value="${m.id}">${m.nama}</option>`).join('');
+  document.getElementById('filterLaporanGuru').innerHTML  = '<option value="">Semua Guru</option>' + gOpts;
+  document.getElementById('filterLaporanMurid').innerHTML = '<option value="">Semua Murid</option>' + mOpts;
+  loadLaporan();
+}
+
+async function loadLaporan() {
+  const bulan    = document.getElementById('filterLaporanBulan').value  || thisBulan();
+  const guru_id  = document.getElementById('filterLaporanGuru').value   || '';
+  const murid_id = document.getElementById('filterLaporanMurid').value  || '';
+  const tb = document.getElementById('laporanTbody');
+  tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr>';
+  try {
+    const opts = { bulan };
+    if (guru_id)  opts.guru_id  = guru_id;
+    if (murid_id) opts.murid_id = murid_id;
+    const sesi = await API.getSesi(opts) || [];
+
+    // Stats
+    const muridSet = new Set(sesi.map(s => s.murid_id));
+    let pendapatan = 0;
+    sesi.forEach(s => {
+      const m = allMurid.find(x => x.id === s.murid_id);
+      if (m) pendapatan += Number(m.rate_per_sesi || 0);
+    });
+    document.getElementById('lStatSesi').textContent       = sesi.length;
+    document.getElementById('lStatMurid').textContent      = muridSet.size;
+    document.getElementById('lStatPendapatan').textContent = 'Rp ' + Math.round(pendapatan/1000) + 'rb';
+
+    if (!sesi.length) {
+      tb.innerHTML = '<tr><td colspan="6" class="empty-state">Tidak ada sesi ditemukan</td></tr>';
+      return;
+    }
+    tb.innerHTML = sesi.map(s => {
+      const guru  = allGuru.find(g  => g.id  === s.guru_id)  || {};
+      const murid = allMurid.find(m => m.id === s.murid_id) || {};
+      return `<tr>
+        <td>${s.tanggal || '–'}</td>
+        <td>${guru.nama || '–'}</td>
+        <td><b>${murid.nama || '–'}</b></td>
+        <td><span class="badge ${progBadgeClass(murid.program)}">${murid.program || '–'}</span></td>
+        <td style="max-width:200px;color:var(--muted)">${s.catatan || '–'}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="hapusSesi('${s.id}')">🗑️</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tb.innerHTML = `<tr><td colspan="6" style="text-align:center;color:red;padding:16px">${e.message}</td></tr>`;
+  }
+}
+
+async function hapusSesi(id) {
+  if (!confirm('Hapus sesi ini?')) return;
+  try {
+    await API.deleteSesi(id);
+    toast('Sesi dihapus', 'success');
+    loadLaporan();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ─── PENGGAJIAN ─────────────────────────────────────
+async function initPenggajian() {
+  document.getElementById('penggajianBulan').value = thisBulan();
+  if (!allGuru.length) allGuru = await API.getGuru() || [];
+  if (!allMurid.length) allMurid = await API.getMurid() || [];
+  loadPenggajian();
+}
+
+async function loadPenggajian() {
+  const bulan = document.getElementById('penggajianBulan').value || thisBulan();
+  const tb    = document.getElementById('penggajianTbody');
+  tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr>';
+  try {
+    if (!allGuru.length)  allGuru  = await API.getGuru()  || [];
+    if (!allMurid.length) allMurid = await API.getMurid() || [];
+    const sesiList = await API.getSesi({ bulan }) || [];
+
+    let grandTotal = 0;
+    const rows = allGuru.filter(g => g.aktif !== 'nonaktif').map(g => {
+      const sesiGuru = sesiList.filter(s => s.guru_id === g.id);
+      const total    = sesiGuru.length * (Number(g.fee_per_sesi) || 0);
+      grandTotal    += total;
+
+      // Group by murid
+      const byMurid = {};
+      sesiGuru.forEach(s => {
+        const m = allMurid.find(x => x.id === s.murid_id);
+        const nm = m ? m.nama : s.murid_id;
+        byMurid[nm] = (byMurid[nm] || []);
+        byMurid[nm].push(s.tanggal);
+      });
+      const detailHtml = Object.entries(byMurid)
+        .map(([nm, tgls]) => `<span class="sesi-chip">${nm}: ${tgls.length}x</span>`)
+        .join('') || '<span style="color:var(--muted);font-size:12px">Belum ada sesi</span>';
+
+      return `<tr>
+        <td><b>${g.nama}</b></td>
+        <td><b>${sesiGuru.length}</b> sesi</td>
+        <td>${fmt(g.fee_per_sesi)}</td>
+        <td class="gaji-guru-amount" style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--purple2)">${fmt(total)}</td>
+        <td>
+          <button class="btn btn-sm btn-purple" style="background:#F5F3FF;color:var(--purple2);border:1px solid #DDD6FE" onclick="showDetailSesi('${g.id}','${g.nama}','${bulan}')">🔍 Detail</button>
+        </td>
+      </tr>`;
+    });
+
+    document.getElementById('totalFeeBulan').textContent = fmt(grandTotal);
+    tb.innerHTML = rows.join('') || '<tr><td colspan="5" class="empty-state">Belum ada data guru aktif</td></tr>';
+  } catch(e) {
+    tb.innerHTML = `<tr><td colspan="5" style="text-align:center;color:red;padding:16px">${e.message}</td></tr>`;
+  }
+}
+
+async function showDetailSesi(guruId, guruNama, bulan) {
+  document.getElementById('detailSesiTitle').textContent = `Detail Sesi – ${guruNama} (${bulan})`;
+  const el = document.getElementById('detailSesiContent');
+  el.innerHTML = '<span class="spinner"></span>';
+  openModal('modalDetailSesi');
+  try {
+    const sesi = await API.getSesi({ guru_id: guruId, bulan }) || [];
+    if (!sesi.length) { el.innerHTML = '<div class="empty-state">Belum ada sesi</div>'; return; }
+
+    const byMurid = {};
+    sesi.forEach(s => {
+      const m = allMurid.find(x => x.id === s.murid_id) || {};
+      const key = m.nama || s.murid_id;
+      if (!byMurid[key]) byMurid[key] = { murid: m, sesi: [] };
+      byMurid[key].sesi.push(s);
+    });
+
+    el.innerHTML = Object.entries(byMurid).map(([nm, {murid, sesi: ss}]) => `
+      <div style="border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="font-weight:800;margin-bottom:8px">${nm} <span class="badge ${progBadgeClass(murid.program)}">${murid.program||''}</span></div>
+        <div>${ss.sort((a,b)=>a.tanggal>b.tanggal?1:-1).map(s =>
+          `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
+            <span>📅 ${s.tanggal}</span>
+            <span style="color:var(--muted)">${s.catatan||''}</span>
+          </div>`
+        ).join('')}</div>
+        <div style="margin-top:8px;font-size:13px;color:var(--muted)">Total: <b>${ss.length} sesi</b></div>
+      </div>
+    `).join('');
+  } catch(e) { el.innerHTML = '<div style="color:red">' + e.message + '</div>'; }
+}
+</script>
+</body>
+</html>

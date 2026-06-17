@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal Guru – Dedi Vocal Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<script src="api.js"></script>
+<style>
+:root{
+  --bg:#F9F7FF;--purple:#7C3AED;--purple2:#6D28D9;--dark:#1C1026;
+  --gold:#F59E0B;--gold2:#D97706;--green:#059669;--teal:#0D9488;
+  --red:#EF4444;--muted:#6B7280;--border:#E5E7EB;--white:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh}
+input,select,textarea,button{font-family:'Nunito',sans-serif}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,var(--dark) 0%,#2D1B4E 100%);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
+.login-box{background:var(--white);border-radius:24px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 24px 80px rgba(0,0,0,.5);text-align:center}
+.login-mark{width:64px;height:64px;background:var(--teal);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;margin:0 auto 14px}
+.login-title{font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.form-group{text-align:left;margin-bottom:14px}
+.form-group label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-group input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:16px;font-weight:700;color:var(--dark);outline:none;text-align:center;letter-spacing:4px;text-transform:uppercase;transition:border-color .2s}
+.form-group input:focus{border-color:var(--teal)}
+.btn-login{width:100%;background:var(--teal);color:#fff;border:none;padding:13px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;margin-top:6px}
+.btn-login:hover{background:#0F766E;transform:translateY(-1px)}
+.login-err{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);display:none;margin-bottom:12px;text-align:center}
+
+/* LOADING */
+#loadingOverlay{position:fixed;inset:0;background:rgba(28,16,38,.85);z-index:999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.spinner-big{width:44px;height:44px;border:4px solid rgba(13,148,136,.3);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loadingOverlay p{color:#fff;font-weight:700}
+
+/* HEADER */
+.app-header{background:var(--dark);height:58px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100}
+.logo-mark{width:36px;height:36px;background:var(--teal);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:18px;color:#fff;flex-shrink:0}
+.app-title{font-family:'Fredoka One',cursive;font-size:18px;color:#fff}
+.app-sub{font-size:11px;color:#9CA3AF;margin-top:-2px}
+.guru-badge{margin-left:auto;background:var(--teal);color:#fff;padding:4px 14px;border-radius:999px;font-size:12px;font-weight:800}
+.btn-logout{background:rgba(255,255,255,.1);color:#D1D5DB;border:1px solid rgba(255,255,255,.15);padding:6px 14px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;margin-left:8px}
+.btn-logout:hover{background:var(--red);color:#fff;border-color:transparent}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--dark) 0%,#2D1B4E 100%);padding:28px 20px 32px;text-align:center}
+.hero-name{font-family:'Fredoka One',cursive;font-size:26px;color:#fff;margin-bottom:4px}
+.hero-sub{font-size:13px;color:#A78BFA;margin-bottom:10px}
+.hero-date{display:inline-block;background:rgba(13,148,136,.2);border:1px solid rgba(13,148,136,.4);border-radius:999px;padding:5px 14px;font-size:12px;font-weight:700;color:#5EEAD4;margin-top:8px}
+.hero-chips{display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.hero-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;color:#D1D5DB}
+
+/* MAIN */
+main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+.card{background:var(--white);border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.card-title{font-weight:800;font-size:15px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--dark);border-top:1px solid #2D1B4E;display:flex;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;cursor:pointer;transition:all .2s;border:none;background:none;color:#9CA3AF;gap:3px}
+.nav-item.active{color:var(--teal)}
+.nav-icon{font-size:20px;line-height:1}
+.nav-label{font-size:10px;font-weight:700}
+.tab-page{display:none}.tab-page.active{display:block}
+
+/* FORMS */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:480px){.form-row{grid-template-columns:1fr}}
+.form-field label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.form-field select,.form-field input,.form-field textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-weight:600;color:var(--dark);outline:none;background:var(--white);transition:border-color .2s}
+.form-field select:focus,.form-field input:focus,.form-field textarea:focus{border-color:var(--teal)}
+.form-field textarea{resize:vertical;min-height:70px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:11px;font-size:13px;font-weight:800;border:none;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--teal);color:#fff}.btn-primary:hover{background:#0F766E}
+.btn-dark{background:var(--dark);color:#fff}.btn-dark:hover{background:#2D1B4E}
+.btn-full{width:100%;justify-content:center;padding:13px}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:8px}
+.btn-danger{background:#FEF2F2;color:var(--red);border:1px solid #FECACA}.btn-danger:hover{background:var(--red);color:#fff}
+
+/* SESI ENTRY */
+.murid-sesi-card{border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;background:var(--white)}
+.murid-sesi-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer}
+.murid-sesi-name{font-weight:800;font-size:14px}
+.murid-sesi-prog{font-size:11px;color:var(--muted);font-weight:600}
+.murid-sesi-count{background:var(--teal);color:#fff;border-radius:999px;padding:3px 12px;font-size:12px;font-weight:800}
+.sesi-dates{margin-top:4px}
+.sesi-date-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sesi-date-row input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;color:var(--dark);outline:none}
+.sesi-date-row input:focus{border-color:var(--teal)}
+.sesi-date-row .catatan-input{flex:2}
+.btn-add-tgl{background:#F0FDFA;color:var(--teal);border:1.5px solid #CCFBF1;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .2s;margin-top:4px}
+.btn-add-tgl:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.badge-green{background:#ECFDF5;color:var(--green)}
+.badge-gray{background:#F3F4F6;color:var(--muted)}
+.badge-teal{background:#F0FDFA;color:var(--teal)}
+.badge-purple{background:#F5F3FF;color:var(--purple2)}
+.prog-online{background:#EEF2FF;color:#4338CA}
+.prog-regular{background:#F0FDFA;color:var(--teal)}
+.prog-home{background:#FFF7ED;color:#C2410C}
+.prog-group{background:#F0FDF4;color:#166534}
+.prog-choir{background:#FDF4FF;color:#7E22CE}
+
+/* FEE CARD */
+.fee-summary{background:linear-gradient(135deg,var(--teal) 0%,#0F766E 100%);border-radius:16px;padding:20px;color:#fff;margin-bottom:16px}
+.fee-label{font-size:12px;opacity:.8;margin-bottom:4px}
+.fee-val{font-family:'Fredoka One',cursive;font-size:36px;line-height:1}
+.fee-detail{font-size:13px;opacity:.8;margin-top:6px}
+
+/* SAVED BANNER */
+.saved-banner{background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:14px;padding:14px 18px;display:none;margin-bottom:14px;align-items:center;gap:12px;font-weight:700;color:var(--green)}
+
+/* TOAST */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--dark);color:#fff;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:700;z-index:9999;transition:transform .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.success{background:var(--green)}
+#toast.error{background:var(--red)}
+
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(13,148,136,.3);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+.empty-state{text-align:center;padding:24px;color:var(--muted);font-size:14px;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-mark">🎼</div>
+    <div class="login-title">Portal Guru</div>
+    <div class="login-sub">Dedi Vocal Academy (DiVA)</div>
+    <div class="login-err" id="loginErr">Kode guru tidak ditemukan. Coba lagi.</div>
+    <div class="form-group">
+      <label>Kode Guru</label>
+      <input type="text" id="kodeInput" placeholder="GURU01" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Masuk →</button>
+    <p style="font-size:12px;color:var(--muted);margin-top:14px">Kode diberikan oleh Admin DiVA</p>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loadingOverlay">
+  <div class="spinner-big"></div>
+  <p>Memuat data...</p>
+</div>
+
+<!-- APP -->
+<div id="appShell" style="display:none;min-height:100vh">
+  <header class="app-header">
+    <div class="logo-mark">D</div>
+    <div><div class="app-title">DiVA</div><div class="app-sub">Portal Guru</div></div>
+    <span class="guru-badge" id="guruBadge">–</span>
+    <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  </header>
+
+  <div class="hero">
+    <div class="hero-name" id="heroNama">Halo, Guru!</div>
+    <div class="hero-sub">Dedi Vocal Academy</div>
+    <div class="hero-date" id="heroDate">–</div>
+    <div class="hero-chips">
+      <span class="hero-chip" id="chipSesiTotal">– sesi bulan ini</span>
+      <span class="hero-chip" id="chipMurid">– murid</span>
+    </div>
+  </div>
+
+  <main>
+    <!-- BERANDA -->
+    <div class="tab-page active" id="tab-beranda">
+      <div class="fee-summary">
+        <div class="fee-label">Estimasi Fee Bulan Ini</div>
+        <div class="fee-val" id="feeEstimasi">Rp –</div>
+        <div class="fee-detail" id="feeDetail">– sesi × –</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👨‍🎓 Murid Saya</div>
+        <div id="berandaMuridList"><span class="spinner"></span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📅 Sesi Terakhir (Bulan Ini)</div>
+        <div id="berandaSesiRecent"><span class="spinner"></span></div>
+      </div>
+    </div>
+
+    <!-- INPUT SESI -->
+    <div class="tab-page" id="tab-sesi">
+      <div class="saved-banner" id="savedBanner">
+        <span>✅</span>
+        <div><div>Laporan berhasil disimpan!</div><div style="font-size:12px;font-weight:600;opacity:.8">Data sesi sudah masuk ke sistem DiVA</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Input Laporan Sesi</div>
+        <div class="form-row" style="margin-bottom:14px">
+          <div class="form-field">
+            <label>Bulan Laporan</label>
+            <input type="month" id="sesisBulan">
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn btn-primary" onclick="loadSesiForm()">🔄 Muat Data</button>
+          </div>
+        </div>
+        <div id="sesiFormContent">
+          <div class="empty-state">Pilih bulan lalu klik "Muat Data"</div>
+        </div>
+        <div id="sesiFormAction" style="display:none;margin-top:14px">
+          <button class="btn btn-primary btn-full" onclick="saveSemua()">💾 Simpan Semua Laporan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEE SAYA -->
+    <div class="tab-page" id="tab-fee">
+      <div class="card">
+        <div class="card-title">💰 Rekap Fee Saya</div>
+        <div class="form-row" style="margin-bottom:14px">
+          <div class="form-field">
+            <label>Pilih Bulan</label>
+            <input type="month" id="feeBulan" onchange="loadFeeRekap()">
+          </div>
+        </div>
+        <div id="feeRekapContent"><span class="spinner"></span></div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="showPage('beranda',this)"><span class="nav-icon">🏠</span><span class="nav-label">Beranda</span></button>
+    <button class="nav-item" onclick="showPage('sesi',this)"><span class="nav-icon">📋</span><span class="nav-label">Input Sesi</span></button>
+    <button class="nav-item" onclick="showPage('fee',this)"><span class="nav-icon">💰</span><span class="nav-label">Fee Saya</span></button>
+  </nav>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let currentGuru  = null;
+let muridSaya    = [];
+let sesiData     = {};   // { muridId: [{ tanggal, catatan }] }
+let pageLoaded   = {};
+
+function showLoading(v) {
+  document.getElementById('loadingOverlay').style.display = v ? 'flex' : 'none';
+}
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+}
+function fmt(n) {
+  return 'Rp ' + Number(n||0).toLocaleString('id-ID');
+}
+function thisBulan() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+function progBadgeClass(prog) {
+  if (!prog) return '';
+  const p = prog.toLowerCase();
+  if (p.includes('online'))  return 'prog-online';
+  if (p.includes('home'))    return 'prog-home';
+  if (p.includes('group'))   return 'prog-group';
+  if (p.includes('choir'))   return 'prog-choir';
+  return 'prog-regular';
+}
+
+// ─── AUTH ───────────────────────────────────────────
+async function doLogin() {
+  const kode = document.getElementById('kodeInput').value.trim().toUpperCase();
+  if (!kode) return;
+  showLoading(true);
+  document.getElementById('loginErr').style.display = 'none';
+  try {
+    const guru = await API.getGuruByKode(kode);
+    if (!guru) throw new Error('Kode tidak ditemukan');
+    currentGuru = guru;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    initApp();
+  } catch(e) {
+    showLoading(false);
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginErr').textContent = e.message || 'Kode guru tidak ditemukan.';
+  }
+}
+function doLogout() {
+  currentGuru = null; muridSaya = []; sesiData = {}; pageLoaded = {};
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appShell').style.display    = 'none';
+  document.getElementById('kodeInput').value = '';
+}
+
+// ─── INIT ───────────────────────────────────────────
+async function initApp() {
+  showLoading(true);
+  try {
+    // Set UI basics
+    document.getElementById('guruBadge').textContent  = currentGuru.nama;
+    document.getElementById('heroNama').textContent   = 'Halo, ' + currentGuru.nama.split(' ')[0] + '!';
+    const now = new Date();
+    document.getElementById('heroDate').textContent   = now.toLocaleDateString('id-ID', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+    // Set month defaults
+    const bln = thisBulan();
+    document.getElementById('sesisBulan').value = bln;
+    document.getElementById('feeBulan').value   = bln;
+
+    // Load murid
+    const allMurid = await API.getMurid() || [];
+    muridSaya = allMurid.filter(m => m.guru_id === currentGuru.id);
+    document.getElementById('chipMurid').textContent = muridSaya.length + ' murid';
+
+    // Load sesi bulan ini
+    const sesi = await API.getSesi({ guru_id: currentGuru.id, bulan: bln }) || [];
+    document.getElementById('chipSesiTotal').textContent = sesi.length + ' sesi bulan ini';
+
+    const totalFee = sesi.length * Number(currentGuru.fee_per_sesi || 0);
+    document.getElementById('feeEstimasi').textContent = fmt(totalFee);
+    document.getElementById('feeDetail').textContent   = `${sesi.length} sesi × ${fmt(currentGuru.fee_per_sesi)}`;
+
+    renderBerandaMurid();
+    renderBerandaSesi(sesi);
+    showLoading(false);
+    pageLoaded['beranda'] = true;
+  } catch(e) {
+    showLoading(false);
+    toast('Gagal memuat data: ' + e.message, 'error');
+  }
+}
+
+function renderBerandaMurid() {
+  const el = document.getElementById('berandaMuridList');
+  if (!muridSaya.length) { el.innerHTML = '<div class="empty-state">Belum ada murid terdaftar</div>'; return; }
+  el.innerHTML = muridSaya.map(m => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:800;font-size:14px">${m.nama}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">${m.no_hp || '–'}</div>
+      </div>
+      <span class="badge ${progBadgeClass(m.program)}">${m.program || '–'}</span>
+    </div>
+  `).join('');
+}
+
+function renderBerandaSesi(sesiList) {
+  const el = document.getElementById('berandaSesiRecent');
+  if (!sesiList.length) { el.innerHTML = '<div class="empty-state">Belum ada sesi bulan ini</div>'; return; }
+  const sorted = [...sesiList].sort((a,b) => b.tanggal > a.tanggal ? 1 : -1).slice(0,8);
+  el.innerHTML = sorted.map(s => {
+    const m = muridSaya.find(x => x.id === s.murid_id) || {};
+    return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <span>📅 <b>${s.tanggal}</b></span>
+      <span>${m.nama || '–'}</span>
+      <span style="color:var(--muted)">${s.catatan ? s.catatan.substring(0,20)+'…' : ''}</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── TABS ───────────────────────────────────────────
+function showPage(id, btn) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (!pageLoaded[id]) {
+    pageLoaded[id] = true;
+    if (id === 'fee') loadFeeRekap();
+  }
+}
+
+// ─── INPUT SESI ─────────────────────────────────────
+async function loadSesiForm() {
+  const bulan = document.getElementById('sesisBulan').value;
+  if (!bulan) return toast('Pilih bulan dulu', 'error');
+  const el    = document.getElementById('sesiFormContent');
+  const actEl = document.getElementById('sesiFormAction');
+  el.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span></div>';
+  actEl.style.display = 'none';
+  sesiData = {};
+
+  try {
+    // Get existing sesi for this bulan
+    const existing = await API.getSesi({ guru_id: currentGuru.id, bulan }) || [];
+
+    if (!muridSaya.length) {
+      el.innerHTML = '<div class="empty-state">Belum ada murid yang ditugaskan</div>';
+      return;
+    }
+
+    // Build sesiData from existing
+    existing.forEach(s => {
+      if (!sesiData[s.murid_id]) sesiData[s.murid_id] = [];
+      sesiData[s.murid_id].push({ id: s.id, tanggal: s.tanggal, catatan: s.catatan || '', saved: true });
+    });
+
+    // Initialize empty for murid yang belum ada
+    muridSaya.forEach(m => {
+      if (!sesiData[m.id]) sesiData[m.id] = [];
+    });
+
+    el.innerHTML = muridSaya.map(m => renderMuridSesiCard(m, bulan)).join('');
+    actEl.style.display = 'block';
+  } catch(e) {
+    el.innerHTML = '<div style="color:red;text-align:center">' + e.message + '</div>';
+    toast(e.message, 'error');
+  }
+}
+
+function renderMuridSesiCard(murid, bulan) {
+  const rows = sesiData[murid.id] || [];
+  return `
+  <div class="murid-sesi-card" id="murid-card-${murid.id}">
+    <div class="murid-sesi-head" onclick="toggleSesiMurid('${murid.id}')">
+      <div>
+        <div class="murid-sesi-name">${murid.nama}</div>
+        <div class="murid-sesi-prog">${murid.program || '–'}</div>
+      </div>
+      <span class="murid-sesi-count" id="count-${murid.id}">${rows.length} sesi</span>
+    </div>
+    <div class="sesi-dates" id="sesi-body-${murid.id}">
+      ${rows.map((r,i) => renderSesiRow(murid.id, i, r.tanggal, r.catatan)).join('')}
+      <button class="btn-add-tgl" onclick="addSesiRow('${murid.id}','${bulan}')">➕ Tambah Tanggal Sesi</button>
+    </div>
+  </div>`;
+}
+
+function renderSesiRow(muridId, idx, tanggal='', catatan='') {
+  return `<div class="sesi-date-row" id="row-${muridId}-${idx}">
+    <input type="date" value="${tanggal}" onchange="updateSesiData('${muridId}',${idx},'tanggal',this.value)">
+    <input type="text" class="catatan-input" placeholder="Catatan (opsional)..." value="${catatan}" oninput="updateSesiData('${muridId}',${idx},'catatan',this.value)">
+    <button class="btn btn-sm btn-danger" onclick="removeSesiRow('${muridId}',${idx})">✕</button>
+  </div>`;
+}
+
+function addSesiRow(muridId, bulan) {
+  const body    = document.getElementById('sesi-body-' + muridId);
+  const idx     = (sesiData[muridId] || []).length;
+  if (!sesiData[muridId]) sesiData[muridId] = [];
+  sesiData[muridId].push({ tanggal: '', catatan: '' });
+
+  // Insert before the button
+  const btn = body.querySelector('.btn-add-tgl');
+  const div = document.createElement('div');
+  div.innerHTML = renderSesiRow(muridId, idx, '', '');
+  body.insertBefore(div.firstElementChild, btn);
+  updateCount(muridId);
+}
+
+function updateSesiData(muridId, idx, key, val) {
+  if (!sesiData[muridId]) sesiData[muridId] = [];
+  if (!sesiData[muridId][idx]) sesiData[muridId][idx] = {};
+  sesiData[muridId][idx][key] = val;
+}
+
+function removeSesiRow(muridId, idx) {
+  sesiData[muridId].splice(idx, 1);
+  // Re-render the card
+  const m = muridSaya.find(x => x.id === muridId);
+  const bulan = document.getElementById('sesisBulan').value;
+  const card = document.getElementById('murid-card-' + muridId);
+  card.outerHTML = renderMuridSesiCard(m, bulan);
+  updateCount(muridId);
+}
+
+function toggleSesiMurid(muridId) {
+  const body = document.getElementById('sesi-body-' + muridId);
+  body.style.display = body.style.display === 'none' ? 'block' : 'none';
+}
+
+function updateCount(muridId) {
+  const el = document.getElementById('count-' + muridId);
+  if (el) el.textContent = (sesiData[muridId] || []).length + ' sesi';
+}
+
+async function saveSemua() {
+  const bulan = document.getElementById('sesisBulan').value;
+  if (!bulan) return toast('Pilih bulan laporan dulu', 'error');
+
+  // Collect all valid sesi
+  const payload = [];
+  for (const [muridId, rows] of Object.entries(sesiData)) {
+    rows.forEach(r => {
+      if (r.tanggal) {
+        payload.push({ murid_id: muridId, guru_id: currentGuru.id, tanggal: r.tanggal, catatan: r.catatan || '', bulan });
+      }
+    });
+  }
+
+  if (!payload.length) return toast('Belum ada tanggal sesi yang diisi', 'error');
+  showLoading(true);
+  try {
+    await API.saveSesiGuru({ guru_id: currentGuru.id, bulan, sesi: payload });
+    showLoading(false);
+    toast(`${payload.length} sesi berhasil disimpan!`, 'success');
+    document.getElementById('savedBanner').style.display = 'flex';
+    setTimeout(() => document.getElementById('savedBanner').style.display = 'none', 4000);
+    // Refresh beranda
+    pageLoaded['beranda'] = false;
+    const newSesi = await API.getSesi({ guru_id: currentGuru.id, bulan: thisBulan() }) || [];
+    document.getElementById('chipSesiTotal').textContent = newSesi.length + ' sesi bulan ini';
+    const totalFee = newSesi.length * Number(currentGuru.fee_per_sesi || 0);
+    document.getElementById('feeEstimasi').textContent = fmt(totalFee);
+    document.getElementById('feeDetail').textContent   = `${newSesi.length} sesi × ${fmt(currentGuru.fee_per_sesi)}`;
+    renderBerandaSesi(newSesi);
+  } catch(e) {
+    showLoading(false);
+    toast(e.message, 'error');
+  }
+}
+
+// ─── FEE REKAP ──────────────────────────────────────
+async function loadFeeRekap() {
+  const bulan = document.getElementById('feeBulan').value || thisBulan();
+  const el    = document.getElementById('feeRekapContent');
+  el.innerHTML = '<span class="spinner"></span>';
+  try {
+    const sesi = await API.getSesi({ guru_id: currentGuru.id, bulan }) || [];
+    const totalFee = sesi.length * Number(currentGuru.fee_per_sesi || 0);
+
+    // Group by murid
+    const byMurid = {};
+    sesi.forEach(s => {
+      const m = muridSaya.find(x => x.id === s.murid_id) || {};
+      if (!byMurid[s.murid_id]) byMurid[s.murid_id] = { nama: m.nama || s.murid_id, sesi: [] };
+      byMurid[s.murid_id].sesi.push(s);
+    });
+
+    el.innerHTML = `
+      <div class="fee-summary">
+        <div class="fee-label">Total Fee – ${bulan}</div>
+        <div class="fee-val" style="font-size:28px">${fmt(totalFee)}</div>
+        <div class="fee-detail">${sesi.length} sesi × ${fmt(currentGuru.fee_per_sesi)}</div>
+      </div>
+      ${Object.entries(byMurid).map(([mid, {nama, sesi: ss}]) => `
+        <div style="border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <b>${nama}</b>
+            <span class="badge badge-teal">${ss.length} sesi</span>
+          </div>
+          ${ss.sort((a,b)=>a.tanggal>b.tanggal?1:-1).map(s =>
+            `<div style="font-size:12px;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border)">📅 ${s.tanggal}${s.catatan ? ' – ' + s.catatan : ''}</div>`
+          ).join('')}
+          <div style="text-align:right;margin-top:8px;font-size:12px;color:var(--teal);font-weight:700">
+            ${ss.length} × ${fmt(currentGuru.fee_per_sesi)} = ${fmt(ss.length * Number(currentGuru.fee_per_sesi||0))}
+          </div>
+        </div>
+      `).join('') || '<div class="empty-state">Belum ada sesi bulan ini</div>'}
+    `;
+  } catch(e) {
+    el.innerHTML = '<div style="color:red">' + e.message + '</div>';
+  }
+}
+</script>
+</body>
+</html>
