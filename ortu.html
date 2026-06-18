@@ -27,58 +27,69 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--dark);min-
 
 /* HEADER */
 .app-header{background:var(--dark);height:56px;display:flex;align-items:center;padding:0 16px;gap:10px;position:sticky;top:0;z-index:100}
-.logo-mark{width:34px;height:34px;background:var(--purple);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:16px;color:#fff;flex-shrink:0}
+.logo-mark{width:34px;height:34px;background:var(--teal);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:16px;color:#fff;flex-shrink:0}
 .app-title{font-family:'Fredoka One',cursive;font-size:18px;color:#fff}
 .app-sub{font-size:10px;color:#9CA3AF;margin-top:-2px}
 
 /* HERO */
-.hero-banner{background:linear-gradient(135deg,var(--dark) 0%,#2D1B4E 100%);padding:28px 16px 32px;text-align:center;position:relative;overflow:hidden}
-.hero-banner::before{content:'';position:absolute;width:200px;height:200px;background:rgba(124,58,237,.15);border-radius:50%;top:-60px;right:-40px;filter:blur(40px)}
-.student-avatar{width:72px;height:72px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:30px;color:#fff;margin:0 auto 12px;border:3px solid rgba(255,255,255,.2)}
-.student-name{font-family:'Fredoka One',cursive;font-size:24px;color:#fff;margin-bottom:4px}
-.student-sub{font-size:13px;color:#A78BFA;margin-bottom:10px}
+.hero-banner{background:linear-gradient(135deg,var(--dark) 0%,#2D1B4E 100%);padding:24px 16px 28px;text-align:center;position:relative;overflow:hidden}
+.hero-banner::before{content:'';position:absolute;width:200px;height:200px;background:rgba(13,148,136,.12);border-radius:50%;top:-60px;right:-40px;filter:blur(40px)}
+.student-avatar{width:66px;height:66px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:28px;color:#fff;margin:0 auto 10px;border:3px solid rgba(255,255,255,.2)}
+.student-name{font-family:'Fredoka One',cursive;font-size:22px;color:#fff;margin-bottom:4px}
+.student-sub{font-size:12px;color:#A78BFA;margin-bottom:10px}
 .hero-chips{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-.hero-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;color:#D1D5DB}
+.hero-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;color:#D1D5DB}
 
 /* CONTENT */
-.content{padding:16px;max-width:600px;margin:0 auto}
+.content{padding:14px;max-width:600px;margin:0 auto}
 
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--dark);border-top:1px solid #2D1B4E;display:flex;z-index:100}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;cursor:pointer;transition:all .2s;border:none;background:none;color:#9CA3AF;gap:3px}
-.nav-item.active{color:var(--purple)}
+.nav-item.active{color:var(--teal)}
 .nav-icon{font-size:20px;line-height:1}
 .nav-label{font-size:10px;font-weight:700}
 .tab-page{display:none}.tab-page.active{display:block}
 
 /* CARDS */
-.section-card{background:var(--white);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
-.card-title{font-weight:800;font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-card{background:var(--white);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.card-title{font-weight:800;font-size:14px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 
-/* STAT CHIPS */
-.stat-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.stat-chip{flex:1;min-width:120px;background:var(--white);border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.stat-chip .s-val{font-family:'Fredoka One',cursive;font-size:26px;color:var(--purple2)}
-.stat-chip .s-label{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
+/* PAKET SESI COUNTDOWN */
+.paket-card{background:linear-gradient(135deg,var(--dark) 0%,#2D1B4E 100%);border-radius:18px;padding:20px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden}
+.paket-card::before{content:'';position:absolute;width:140px;height:140px;background:rgba(13,148,136,.15);border-radius:50%;bottom:-40px;right:-30px;filter:blur(30px)}
+.paket-label{font-size:11px;opacity:.7;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.paket-countdown{display:flex;align-items:baseline;gap:6px}
+.paket-sisa{font-family:'Fredoka One',cursive;font-size:52px;line-height:1;color:#5EEAD4}
+.paket-from{font-size:16px;opacity:.6}
+.paket-label2{font-size:13px;opacity:.8;margin-top:4px;margin-bottom:14px}
+.paket-bar-wrap{background:rgba(255,255,255,.12);border-radius:999px;height:10px;overflow:hidden}
+.paket-bar{height:10px;border-radius:999px;background:var(--teal);transition:width .5s ease}
+.paket-warn{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.4);border-radius:10px;padding:8px 12px;margin-top:12px;font-size:12px;font-weight:700;color:#FCA5A5}
 
-/* SESI LIST */
-.sesi-item{border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;background:var(--white)}
-.sesi-date{font-weight:800;font-size:14px}
-.sesi-guru{font-size:12px;color:var(--muted);margin-top:2px}
-.sesi-note{font-size:12px;color:var(--muted);margin-top:4px;font-style:italic}
+/* KBM SESI CARD */
+.kbm-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.04)}
+.kbm-head{padding:12px 14px;background:var(--bg);display:flex;align-items:center;justify-content:space-between}
+.kbm-tgl{font-weight:800;font-size:14px}
+.kbm-body{padding:12px 14px;border-top:1px solid var(--border)}
+.kbm-lesson{font-size:13px;line-height:1.5;color:var(--dark);margin-bottom:8px}
+.kbm-foto{width:100%;max-height:220px;object-fit:cover;border-radius:10px;cursor:pointer;display:block}
 
-/* TAGIHAN */
-.tagihan-card{background:linear-gradient(135deg,var(--purple) 0%,var(--purple2) 100%);border-radius:16px;padding:22px;color:#fff;margin-bottom:16px}
-.tagihan-label{font-size:12px;opacity:.8;margin-bottom:4px}
-.tagihan-val{font-family:'Fredoka One',cursive;font-size:36px}
-.tagihan-sub{font-size:13px;opacity:.8;margin-top:6px}
-.spp-card{border:1.5px solid var(--border);border-radius:14px;padding:16px;background:var(--white);margin-bottom:14px}
-.spp-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
-.spp-row:last-child{border-bottom:none}
+/* SPP */
+.spp-banner{border-radius:16px;padding:16px 18px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.spp-sudah{background:linear-gradient(135deg,var(--green) 0%,#047857 100%);color:#fff}
+.spp-belum{background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);color:#fff}
+.spp-val{font-family:'Fredoka One',cursive;font-size:22px}
+.spp-sub{font-size:11px;opacity:.85;margin-top:2px}
+
+/* INFO ROWS */
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.info-row:last-child{border-bottom:none}
 
 /* BADGES */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
 .badge-green{background:#ECFDF5;color:var(--green)}
+.badge-teal{background:#F0FDFA;color:var(--teal)}
 .badge-yellow{background:#FFFBEB;color:var(--gold2)}
 .badge-purple{background:#F5F3FF;color:var(--purple2)}
 .badge-red{background:#FEF2F2;color:var(--red)}
@@ -88,8 +99,12 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--dark);min-
 .prog-group{background:#F0FDF4;color:#166534}
 .prog-choir{background:#FDF4FF;color:#7E22CE}
 
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(124,58,237,.3);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
-.empty-state{text-align:center;padding:32px;color:var(--muted);font-size:14px;font-weight:600}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(13,148,136,.3);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+.empty-state{text-align:center;padding:28px;color:var(--muted);font-size:14px;font-weight:600}
+
+/* MODAL FOTO */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
 </style>
 </head>
 <body>
@@ -105,7 +120,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--dark);min-
   <div style="font-size:56px">😕</div>
   <h2>Halaman Tidak Ditemukan</h2>
   <p>Link portal murid tidak valid. Hubungi admin DiVA untuk mendapatkan link yang benar.</p>
-  <a href="index.html" style="background:var(--purple);color:#fff;padding:12px 24px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px">Kembali ke Beranda</a>
+  <a href="index.html" style="background:var(--teal);color:#fff;padding:12px 24px;border-radius:12px;font-weight:700;text-decoration:none;margin-top:8px">Kembali ke Beranda</a>
 </div>
 
 <!-- APP -->
@@ -118,10 +133,11 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--dark);min-
   <div class="hero-banner">
     <div class="student-avatar" id="studentAvatar">?</div>
     <div class="student-name" id="studentName">–</div>
-    <div class="student-sub" id="studentSub">–</div>
+    <div class="student-sub">Dedi Vocal Academy (DiVA)</div>
     <div class="hero-chips">
       <span class="hero-chip" id="chipProgram">–</span>
       <span class="hero-chip" id="chipGuru">–</span>
+      <span class="hero-chip" id="chipSisa">– sesi tersisa</span>
     </div>
   </div>
 
@@ -129,51 +145,50 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--dark);min-
 
     <!-- BERANDA -->
     <div class="tab-page active" id="tab-beranda">
-      <div class="stat-row">
-        <div class="stat-chip"><div class="s-val" id="statSesiBulan">–</div><div class="s-label">Sesi Bulan Ini</div></div>
-        <div class="stat-chip"><div class="s-val" id="statSesiTotal">–</div><div class="s-label">Total Sesi</div></div>
-        <div class="stat-chip"><div class="s-val" id="statTagihanChip">–</div><div class="s-label">Tagihan Bulan Ini</div></div>
-      </div>
+      <!-- COUNTDOWN PAKET -->
+      <div id="paketWidget"></div>
 
+      <!-- KBM TERBARU -->
       <div class="section-card">
-        <div class="card-title">📅 Sesi Terbaru</div>
-        <div id="recentSesi"><span class="spinner"></span></div>
+        <div class="card-title">📅 KBM Terbaru</div>
+        <div id="recentKBM"><span class="spinner"></span></div>
       </div>
 
+      <!-- INFO -->
       <div class="section-card">
         <div class="card-title">ℹ️ Info Saya</div>
-        <div id="infoSaya"><span class="spinner"></span></div>
+        <div id="infoSaya"></div>
       </div>
     </div>
 
-    <!-- SESI -->
-    <div class="tab-page" id="tab-sesi">
-      <div class="section-card">
-        <div class="card-title">📅 Histori Sesi</div>
-        <div style="display:flex;gap:8px;margin-bottom:14px">
-          <input type="month" id="filterSesiBulan" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;outline:none;flex:1" onchange="loadSesiMurid()">
-          <button onclick="loadSesiMurid()" style="background:var(--purple);color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">Filter</button>
-        </div>
-        <div id="sesiList"><span class="spinner"></span></div>
+    <!-- HISTORI KBM -->
+    <div class="tab-page" id="tab-histori">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="month" id="filterHBulan" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;outline:none" onchange="loadHistoriMurid()">
+        <button onclick="loadHistoriMurid()" style="background:var(--teal);color:#fff;border:none;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">Filter</button>
       </div>
+      <div id="historiList"><span class="spinner"></span></div>
     </div>
 
-    <!-- TAGIHAN -->
-    <div class="tab-page" id="tab-tagihan">
-      <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
-        <input type="month" id="tagihanBulan" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;outline:none;flex:1" onchange="loadTagihan()">
-        <button onclick="loadTagihan()" style="background:var(--purple);color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">Lihat</button>
-      </div>
-      <div id="tagihanContent"><span class="spinner"></span></div>
+    <!-- SPP -->
+    <div class="tab-page" id="tab-spp">
+      <div id="sppContent"><span class="spinner"></span></div>
     </div>
 
   </div>
 
   <nav class="bottom-nav">
     <button class="nav-item active" onclick="showPage('beranda',this)"><span class="nav-icon">🏠</span><span class="nav-label">Beranda</span></button>
-    <button class="nav-item" onclick="showPage('sesi',this)"><span class="nav-icon">📅</span><span class="nav-label">Sesi</span></button>
-    <button class="nav-item" onclick="showPage('tagihan',this)"><span class="nav-icon">🧾</span><span class="nav-label">Tagihan</span></button>
+    <button class="nav-item" onclick="showPage('histori',this)"><span class="nav-icon">📅</span><span class="nav-label">Histori KBM</span></button>
+    <button class="nav-item" onclick="showPage('spp',this)"><span class="nav-icon">💳</span><span class="nav-label">SPP</span></button>
   </nav>
+</div>
+
+<!-- MODAL FOTO -->
+<div class="modal-overlay" id="modalFoto" onclick="closeFoto()">
+  <div style="max-width:560px;width:100%">
+    <img id="fotoFull" style="width:100%;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.5)">
+  </div>
 </div>
 
 <script>
@@ -204,10 +219,19 @@ function showPage(id, btn) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'sesi')     loadSesiMurid();
-  if (id === 'tagihan')  loadTagihan();
+  if (id === 'histori') loadHistoriMurid();
+  if (id === 'spp')     renderSPP();
 }
 
+function lihatFoto(url) {
+  document.getElementById('fotoFull').src = url;
+  document.getElementById('modalFoto').classList.add('open');
+}
+function closeFoto() {
+  document.getElementById('modalFoto').classList.remove('open');
+}
+
+// ── INIT ─────────────────────────────────────────────
 async function init() {
   const params  = new URLSearchParams(location.search);
   const link_id = params.get('id');
@@ -221,7 +245,6 @@ async function init() {
     muridData = await API.getMuridByLink(link_id);
     if (!muridData || !muridData.id) throw new Error('Murid tidak ditemukan');
 
-    // Load guru info
     if (muridData.guru_id) {
       try {
         const allGuru = await API.getGuru() || [];
@@ -229,33 +252,25 @@ async function init() {
       } catch(e) {}
     }
 
-    // Load all sesi
     allSesi = await API.getSesi({ murid_id: muridData.id }) || [];
 
-    // Setup UI
+    // Hero
     const initial = muridData.nama ? muridData.nama.charAt(0).toUpperCase() : '?';
     document.getElementById('studentAvatar').textContent = initial;
     document.getElementById('studentName').textContent   = muridData.nama || '–';
-    document.getElementById('studentSub').textContent    = 'Dedi Vocal Academy (DiVA)';
     document.getElementById('chipProgram').textContent   = muridData.program || '–';
     document.getElementById('chipGuru').textContent      = '🎼 ' + (guruData ? guruData.nama : '–');
 
-    // Stats
-    const bln = thisBulan();
-    const sesiBulan = allSesi.filter(s => s.bulan === bln);
-    document.getElementById('statSesiBulan').textContent  = sesiBulan.length;
-    document.getElementById('statSesiTotal').textContent  = allSesi.length;
-    const tagihanBulan = sesiBulan.length * Number(muridData.rate_per_sesi || 0);
-    document.getElementById('statTagihanChip').textContent = tagihanBulan >= 1000
-      ? 'Rp ' + Math.round(tagihanBulan/1000) + 'rb'
-      : fmt(tagihanBulan);
+    const paket = Number(muridData.paket_sesi || 0);
+    const sisa  = Number(muridData.sisa_sesi  ?? paket);
+    document.getElementById('chipSisa').textContent = sisa + ' sesi tersisa';
 
-    // Set month defaults
-    document.getElementById('filterSesiBulan').value = bln;
-    document.getElementById('tagihanBulan').value    = bln;
+    // Set month default
+    document.getElementById('filterHBulan').value = thisBulan();
 
-    // Render beranda
-    renderRecentSesi();
+    // Render beranda components
+    renderPaketWidget(paket, sisa);
+    renderRecentKBM();
     renderInfoSaya();
 
     document.getElementById('loadingScreen').style.display = 'none';
@@ -267,120 +282,154 @@ async function init() {
   }
 }
 
-function renderRecentSesi() {
-  const el = document.getElementById('recentSesi');
-  const recent = [...allSesi].sort((a,b) => b.tanggal > a.tanggal ? 1 : -1).slice(0,5);
-  if (!recent.length) { el.innerHTML = '<div class="empty-state">Belum ada sesi tercatat</div>'; return; }
-  el.innerHTML = recent.map(s => `
-    <div class="sesi-item">
-      <div>
-        <div class="sesi-date">📅 ${s.tanggal}</div>
-        <div class="sesi-guru">Guru: ${guruData ? guruData.nama : '–'}</div>
-        ${s.catatan ? `<div class="sesi-note">"${s.catatan}"</div>` : ''}
-      </div>
-      <span class="badge badge-green">✓ Hadir</span>
-    </div>
-  `).join('');
-}
-
-function renderInfoSaya() {
-  const el = document.getElementById('infoSaya');
-  el.innerHTML = `
-    <div class="spp-row"><span style="color:var(--muted)">Nama</span><b>${muridData.nama || '–'}</b></div>
-    <div class="spp-row"><span style="color:var(--muted)">Program</span><span class="badge ${progBadgeClass(muridData.program)}">${muridData.program || '–'}</span></div>
-    <div class="spp-row"><span style="color:var(--muted)">Guru</span><b>${guruData ? guruData.nama : '–'}</b></div>
-    <div class="spp-row"><span style="color:var(--muted)">No. HP</span><b>${muridData.no_hp || '–'}</b></div>
-    <div class="spp-row"><span style="color:var(--muted)">Rate per Sesi</span><b>${fmt(muridData.rate_per_sesi)}</b></div>
-  `;
-}
-
-function loadSesiMurid() {
-  const bulan = document.getElementById('filterSesiBulan').value;
-  const el    = document.getElementById('sesiList');
-  let list    = allSesi;
-  if (bulan) list = list.filter(s => s.bulan === bulan || s.tanggal?.startsWith(bulan));
-  list = list.sort((a,b) => b.tanggal > a.tanggal ? 1 : -1);
-
-  if (!list.length) {
-    el.innerHTML = `<div class="empty-state">Tidak ada sesi${bulan ? ' di ' + bulan : ''}</div>`;
+// ── PAKET COUNTDOWN ──────────────────────────────────
+function renderPaketWidget(paket, sisa) {
+  const el = document.getElementById('paketWidget');
+  if (!paket) {
+    el.innerHTML = `
+      <div class="section-card">
+        <div class="card-title">🎯 Paket Sesi</div>
+        <div class="empty-state">Belum ada paket sesi.<br>Hubungi admin DiVA.</div>
+      </div>`;
     return;
   }
 
-  // Group by bulan
-  const byBulan = {};
-  list.forEach(s => {
-    const b = s.bulan || s.tanggal?.substring(0,7) || '–';
-    if (!byBulan[b]) byBulan[b] = [];
-    byBulan[b].push(s);
-  });
-
-  el.innerHTML = Object.entries(byBulan).map(([b, ss]) => `
-    <div style="margin-bottom:14px">
-      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${b} · ${ss.length} sesi</div>
-      ${ss.map(s => `
-        <div class="sesi-item">
-          <div>
-            <div class="sesi-date">📅 ${s.tanggal}</div>
-            ${s.catatan ? `<div class="sesi-note">"${s.catatan}"</div>` : ''}
-          </div>
-          <span class="badge badge-green">✓</span>
-        </div>
-      `).join('')}
-    </div>
-  `).join('');
-}
-
-function loadTagihan() {
-  const bulan = document.getElementById('tagihanBulan').value || thisBulan();
-  const el    = document.getElementById('tagihanContent');
-  const sesiBulan = allSesi.filter(s => {
-    const b = s.bulan || s.tanggal?.substring(0,7);
-    return b === bulan;
-  });
-
-  const rate  = Number(muridData.rate_per_sesi || 0);
-  const total = sesiBulan.length * rate;
+  const pct  = Math.max(0, Math.min(1, sisa / paket));
+  const barW = Math.round(pct * 100);
+  const isLow = sisa <= Math.ceil(paket * 0.25);
+  const warnHtml = isLow
+    ? `<div class="paket-warn">⚠️ Sesi hampir habis! Segera hubungi admin untuk top-up.</div>`
+    : '';
 
   el.innerHTML = `
-    <div class="tagihan-card">
-      <div class="tagihan-label">Tagihan Bulan ${bulan}</div>
-      <div class="tagihan-val">${fmt(total)}</div>
-      <div class="tagihan-sub">${sesiBulan.length} sesi × ${fmt(rate)}</div>
-    </div>
-
-    <div class="spp-card">
-      <div style="font-weight:800;font-size:14px;margin-bottom:10px">📋 Rincian Tagihan</div>
-      <div class="spp-row"><span style="color:var(--muted)">Jumlah Sesi</span><b>${sesiBulan.length} sesi</b></div>
-      <div class="spp-row"><span style="color:var(--muted)">Rate per Sesi</span><b>${fmt(rate)}</b></div>
-      <div class="spp-row" style="font-size:15px"><span style="font-weight:800">Total Tagihan</span><b style="color:var(--purple2)">${fmt(total)}</b></div>
-    </div>
-
-    ${muridData.nominal_spp ? `
-    <div class="spp-card">
-      <div style="font-weight:800;font-size:14px;margin-bottom:10px">💳 Status SPP</div>
-      <div class="spp-row"><span style="color:var(--muted)">Nominal SPP</span><b>${fmt(muridData.nominal_spp)}</b></div>
-      <div class="spp-row"><span style="color:var(--muted)">Tgl Bayar</span><b>${muridData.tgl_bayar_spp || '–'}</b></div>
-      <div class="spp-row"><span style="color:var(--muted)">Status</span>
-        ${muridData.tgl_bayar_spp
-          ? '<span class="badge badge-green">✓ Sudah Bayar</span>'
-          : '<span class="badge badge-yellow">⏳ Belum Bayar</span>'}
+    <div class="paket-card">
+      <div class="paket-label">Paket Sesi Aktif</div>
+      <div class="paket-countdown">
+        <div class="paket-sisa">${sisa}</div>
+        <div class="paket-from">/ ${paket}</div>
       </div>
-    </div>` : ''}
+      <div class="paket-label2">sesi tersisa</div>
+      <div class="paket-bar-wrap">
+        <div class="paket-bar" style="width:${barW}%;background:${isLow ? '#F59E0B' : 'var(--teal)'}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;opacity:.6">
+        <span>${paket - sisa} sesi terpakai</span>
+        <span>${sisa} sesi tersisa</span>
+      </div>
+      ${warnHtml}
+    </div>`;
+}
 
-    ${sesiBulan.length ? `
-    <div class="section-card" style="margin-top:0">
-      <div class="card-title">📅 Detail Sesi Bulan Ini</div>
-      ${sesiBulan.sort((a,b)=>a.tanggal>b.tanggal?1:-1).map((s,i) => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px">
-          <span><b>${i+1}.</b> 📅 ${s.tanggal}</span>
-          <span style="color:var(--muted)">${s.catatan || ''}</span>
-          <span class="badge badge-green">✓</span>
+// ── RECENT KBM ───────────────────────────────────────
+function renderRecentKBM() {
+  const el = document.getElementById('recentKBM');
+  const recent = [...allSesi].sort((a,b) => b.tanggal > a.tanggal ? 1 : -1).slice(0, 4);
+  if (!recent.length) {
+    el.innerHTML = '<div class="empty-state">Belum ada KBM tercatat</div>';
+    return;
+  }
+  el.innerHTML = recent.map(s => kbmCardHtml(s)).join('');
+}
+
+function kbmCardHtml(s) {
+  const bulanLabel = s.bulan || s.tanggal?.substring(0,7) || '';
+  return `
+  <div class="kbm-card">
+    <div class="kbm-head">
+      <div>
+        <div class="kbm-tgl">📅 ${s.tanggal || '–'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Guru: ${guruData ? guruData.nama : '–'}</div>
+      </div>
+      <span class="badge badge-teal">✓ Hadir</span>
+    </div>
+    ${(s.today_lesson || s.foto_url) ? `
+    <div class="kbm-body">
+      ${s.today_lesson ? `<div class="kbm-lesson">📖 <b>Materi:</b> ${s.today_lesson}</div>` : ''}
+      ${s.foto_url
+        ? `<img src="${s.foto_url}" class="kbm-foto" onclick="lihatFoto('${s.foto_url}')" alt="Foto KBM">`
+        : ''}
+    </div>` : ''}
+  </div>`;
+}
+
+// ── INFO SAYA ─────────────────────────────────────────
+function renderInfoSaya() {
+  const el = document.getElementById('infoSaya');
+  const paket = Number(muridData.paket_sesi || 0);
+  const sisa  = Number(muridData.sisa_sesi  ?? paket);
+  el.innerHTML = `
+    <div class="info-row"><span style="color:var(--muted)">Nama</span><b>${muridData.nama || '–'}</b></div>
+    <div class="info-row"><span style="color:var(--muted)">Program</span><span class="badge ${progBadgeClass(muridData.program)}">${muridData.program || '–'}</span></div>
+    <div class="info-row"><span style="color:var(--muted)">Guru</span><b>${guruData ? guruData.nama : '–'}</b></div>
+    <div class="info-row"><span style="color:var(--muted)">No. HP</span><b>${muridData.no_hp || '–'}</b></div>
+    <div class="info-row"><span style="color:var(--muted)">Paket Sesi</span><b>${paket} sesi</b></div>
+    <div class="info-row"><span style="color:var(--muted)">Terpakai</span><b>${paket - sisa} sesi</b></div>
+    <div class="info-row"><span style="color:var(--muted)">Sisa</span><b style="color:var(--teal)">${sisa} sesi</b></div>
+    <div class="info-row"><span style="color:var(--muted)">Total KBM</span><b>${allSesi.length} sesi</b></div>
+  `;
+}
+
+// ── HISTORI KBM ──────────────────────────────────────
+function loadHistoriMurid() {
+  const bulan = document.getElementById('filterHBulan').value;
+  const el    = document.getElementById('historiList');
+  let list = allSesi;
+  if (bulan) list = list.filter(s => (s.bulan || s.tanggal?.substring(0,7)) === bulan);
+  list = [...list].sort((a,b) => b.tanggal > a.tanggal ? 1 : -1);
+
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state">Tidak ada KBM${bulan ? ' di ' + bulan : ''}</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">
+      ${bulan || 'Semua'} · ${list.length} sesi
+    </div>
+    ${list.map(s => kbmCardHtml(s)).join('')}
+  `;
+}
+
+// ── SPP ───────────────────────────────────────────────
+function renderSPP() {
+  const el = document.getElementById('sppContent');
+  const paket = Number(muridData.paket_sesi || 0);
+  const sisa  = Number(muridData.sisa_sesi  ?? paket);
+  const sudah = !!muridData.tgl_bayar_spp;
+
+  const sppBanner = muridData.nominal_spp ? `
+    <div class="spp-banner ${sudah ? 'spp-sudah' : 'spp-belum'}">
+      <div>
+        <div style="font-size:11px;opacity:.8;font-weight:700;margin-bottom:4px">Nominal SPP</div>
+        <div class="spp-val">${fmt(muridData.nominal_spp)}</div>
+        <div class="spp-sub">${sudah ? '✓ Sudah dibayar' : '⏳ Belum dibayar'}</div>
+      </div>
+      <span style="font-size:36px">${sudah ? '✅' : '⏳'}</span>
+    </div>
+    <div class="section-card">
+      <div class="info-row"><span style="color:var(--muted)">Nominal SPP</span><b>${fmt(muridData.nominal_spp)}</b></div>
+      <div class="info-row"><span style="color:var(--muted)">Tgl Bayar</span><b>${muridData.tgl_bayar_spp || 'Belum'}</b></div>
+      <div class="info-row"><span style="color:var(--muted)">Status</span>
+        ${sudah ? '<span class="badge badge-green">✓ Sudah Bayar</span>' : '<span class="badge badge-yellow">⏳ Belum Bayar</span>'}
+      </div>
+    </div>
+  ` : `<div class="empty-state">Belum ada data SPP</div>`;
+
+  el.innerHTML = `
+    ${sppBanner}
+    <div class="section-card">
+      <div class="card-title">🎯 Status Paket Sesi</div>
+      <div class="info-row"><span style="color:var(--muted)">Paket Aktif</span><b>${paket} sesi</b></div>
+      <div class="info-row"><span style="color:var(--muted)">Terpakai</span><b>${paket - sisa} sesi</b></div>
+      <div class="info-row"><span style="color:var(--muted)">Sisa</span><b style="color:${sisa <= Math.ceil(paket*.25) ? 'var(--red)' : 'var(--teal)'}">${sisa} sesi</b></div>
+      <div style="padding-top:10px">
+        <div class="paket-bar-wrap" style="background:#F3F4F6">
+          <div class="paket-bar" style="width:${paket ? Math.round((sisa/paket)*100) : 0}%;background:${sisa <= Math.ceil(paket*.25) ? 'var(--gold)' : 'var(--teal)'}"></div>
         </div>
-      `).join('')}
-    </div>` : ''}
+      </div>
+    </div>
 
-    <div style="text-align:center;padding:14px;font-size:12px;color:var(--muted)">
-      Hubungi admin DiVA untuk konfirmasi pembayaran
+    <div style="text-align:center;padding:16px;font-size:12px;color:var(--muted)">
+      Hubungi admin DiVA untuk konfirmasi pembayaran atau top-up sesi
     </div>
   `;
 }

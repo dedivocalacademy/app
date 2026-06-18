@@ -295,7 +295,7 @@ tr:hover td{background:#FAFAF9}
                 <option value="Choir">Choir</option>
               </select>
             </div>
-            <div class="form-field"><label>Rate per Sesi (Rp)</label><input type="number" id="fMuridRate" placeholder="200000" min="0"></div>
+            <div class="form-field"><label>Paket Sesi (Jumlah)</label><input type="number" id="fMuridPaket" placeholder="10" min="0"></div>
           </div>
           <div class="form-row">
             <div class="form-field"><label>Guru Tetap</label><select id="fMuridGuru"><option value="">Pilih Guru...</option></select></div>
@@ -332,7 +332,7 @@ tr:hover td{background:#FAFAF9}
 
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Nama Murid</th><th>Program</th><th>Guru</th><th>Rate/Sesi</th><th>No. HP</th><th>SPP</th><th>Status</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Nama Murid</th><th>Program</th><th>Guru</th><th>Paket / Sisa Sesi</th><th>No. HP</th><th>SPP</th><th>Status</th><th>Aksi</th></tr></thead>
             <tbody id="muridTbody"><tr><td colspan="8" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr></tbody>
           </table>
         </div>
@@ -360,7 +360,7 @@ tr:hover td{background:#FAFAF9}
 
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Tanggal</th><th>Guru</th><th>Murid</th><th>Program</th><th>Catatan</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Tanggal</th><th>Guru</th><th>Murid</th><th>Program</th><th>Materi / Foto</th><th>Aksi</th></tr></thead>
             <tbody id="laporanTbody"><tr><td colspan="6" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr></tbody>
           </table>
         </div>
@@ -435,7 +435,7 @@ tr:hover td{background:#FAFAF9}
           <option>Vocal Group Reguler</option><option>Vocal Group Home</option><option>Choir</option>
         </select>
       </div>
-      <div class="form-field"><label>Rate per Sesi (Rp)</label><input type="number" id="editMuridRate"></div>
+      <div class="form-field"><label>Paket Sesi (Jumlah)</label><input type="number" id="editMuridPaket"></div>
     </div>
     <div class="form-row">
       <div class="form-field"><label>Guru Tetap</label><select id="editMuridGuru"></select></div>
@@ -465,6 +465,13 @@ tr:hover td{background:#FAFAF9}
     <button class="modal-close" onclick="closeModal('modalDetailSesi')">✕</button>
     <div class="modal-title" id="detailSesiTitle">Detail Sesi</div>
     <div id="detailSesiContent"></div>
+  </div>
+</div>
+
+<!-- MODAL FOTO -->
+<div class="modal-overlay" id="modalFotoAdmin" onclick="closeModal('modalFotoAdmin')" style="background:rgba(0,0,0,.8)">
+  <div style="max-width:560px;width:100%;padding:20px">
+    <img id="fotoAdminFull" style="width:100%;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.5)">
   </div>
 </div>
 
@@ -749,11 +756,14 @@ function renderMuridTable() {
     const sppStatus = m.tgl_bayar_spp
       ? `<span class="badge badge-green">✓ ${m.tgl_bayar_spp}</span>`
       : '<span class="badge badge-yellow">Belum</span>';
+    const paket = Number(m.paket_sesi || 0);
+    const sisa  = Number(m.sisa_sesi  ?? paket);
+    const pctColor = !paket ? 'badge-gray' : (sisa/paket <= 0.25 ? 'badge-red' : 'badge-green');
     return `<tr>
       <td><b>${m.nama}</b></td>
       <td><span class="badge ${progBadgeClass(m.program)}">${m.program || '–'}</span></td>
       <td>${guru ? guru.nama : '<span style="color:var(--muted)">–</span>'}</td>
-      <td>${fmt(m.rate_per_sesi)}</td>
+      <td><span class="badge ${pctColor}">${sisa}/${paket}</span></td>
       <td>${m.no_hp || '–'}</td>
       <td>${sppStatus}</td>
       <td>${aktifBadge}</td>
@@ -767,13 +777,13 @@ function renderMuridTable() {
 
 async function saveMurid() {
   const data = {
-    nama:          document.getElementById('fMuridNama').value.trim(),
-    no_hp:         document.getElementById('fMuridHp').value.trim(),
-    program:       document.getElementById('fMuridProgram').value,
-    rate_per_sesi: document.getElementById('fMuridRate').value,
-    guru_id:       document.getElementById('fMuridGuru').value,
-    aktif:         document.getElementById('fMuridAktif').value,
-    nominal_spp:   document.getElementById('fMuridSppNominal').value,
+    nama:        document.getElementById('fMuridNama').value.trim(),
+    no_hp:       document.getElementById('fMuridHp').value.trim(),
+    program:     document.getElementById('fMuridProgram').value,
+    paket_sesi:  document.getElementById('fMuridPaket').value,
+    guru_id:     document.getElementById('fMuridGuru').value,
+    aktif:       document.getElementById('fMuridAktif').value,
+    nominal_spp: document.getElementById('fMuridSppNominal').value,
     tgl_bayar_spp: document.getElementById('fMuridSppTgl').value,
   };
   if (!data.nama) return toast('Nama murid wajib diisi', 'error');
@@ -781,7 +791,7 @@ async function saveMurid() {
     await API.addMurid(data);
     toast('Murid berhasil ditambahkan!', 'success');
     toggleForm('form-murid');
-    ['fMuridNama','fMuridHp','fMuridRate','fMuridSppNominal','fMuridSppTgl'].forEach(id => document.getElementById(id).value = '');
+    ['fMuridNama','fMuridHp','fMuridPaket','fMuridSppNominal','fMuridSppTgl'].forEach(id => document.getElementById(id).value = '');
     tabLoaded.dashboard = false;
     loadMurid();
   } catch(e) { toast(e.message, 'error'); }
@@ -794,7 +804,7 @@ function openEditMurid(id) {
   document.getElementById('editMuridNama').value        = m.nama;
   document.getElementById('editMuridHp').value          = m.no_hp || '';
   document.getElementById('editMuridProgram').value     = m.program || 'Vocal Regular';
-  document.getElementById('editMuridRate').value        = m.rate_per_sesi || '';
+  document.getElementById('editMuridPaket').value       = m.paket_sesi || '';
   document.getElementById('editMuridGuru').value        = m.guru_id || '';
   document.getElementById('editMuridAktif').value       = m.aktif || 'aktif';
   document.getElementById('editMuridSppNominal').value  = m.nominal_spp || '';
@@ -811,13 +821,13 @@ async function updateMurid() {
   const id = document.getElementById('editMuridId').value;
   const data = {
     id,
-    nama:          document.getElementById('editMuridNama').value.trim(),
-    no_hp:         document.getElementById('editMuridHp').value.trim(),
-    program:       document.getElementById('editMuridProgram').value,
-    rate_per_sesi: document.getElementById('editMuridRate').value,
-    guru_id:       document.getElementById('editMuridGuru').value,
-    aktif:         document.getElementById('editMuridAktif').value,
-    nominal_spp:   document.getElementById('editMuridSppNominal').value,
+    nama:        document.getElementById('editMuridNama').value.trim(),
+    no_hp:       document.getElementById('editMuridHp').value.trim(),
+    program:     document.getElementById('editMuridProgram').value,
+    paket_sesi:  document.getElementById('editMuridPaket').value,
+    guru_id:     document.getElementById('editMuridGuru').value,
+    aktif:       document.getElementById('editMuridAktif').value,
+    nominal_spp: document.getElementById('editMuridSppNominal').value,
     tgl_bayar_spp: document.getElementById('editMuridSppTgl').value,
   };
   if (!data.nama) return toast('Nama murid wajib diisi', 'error');
@@ -867,14 +877,14 @@ async function loadLaporan() {
 
     // Stats
     const muridSet = new Set(sesi.map(s => s.murid_id));
-    let pendapatan = 0;
+    let totalFeeGuru = 0;
     sesi.forEach(s => {
-      const m = allMurid.find(x => x.id === s.murid_id);
-      if (m) pendapatan += Number(m.rate_per_sesi || 0);
+      const g = allGuru.find(x => x.id === s.guru_id);
+      if (g) totalFeeGuru += Number(g.fee_per_sesi || 0);
     });
     document.getElementById('lStatSesi').textContent       = sesi.length;
     document.getElementById('lStatMurid').textContent      = muridSet.size;
-    document.getElementById('lStatPendapatan').textContent = 'Rp ' + Math.round(pendapatan/1000) + 'rb';
+    document.getElementById('lStatPendapatan').textContent = 'Rp ' + Math.round(totalFeeGuru/1000) + 'rb';
 
     if (!sesi.length) {
       tb.innerHTML = '<tr><td colspan="6" class="empty-state">Tidak ada sesi ditemukan</td></tr>';
@@ -883,18 +893,29 @@ async function loadLaporan() {
     tb.innerHTML = sesi.map(s => {
       const guru  = allGuru.find(g  => g.id  === s.guru_id)  || {};
       const murid = allMurid.find(m => m.id === s.murid_id) || {};
+      const materi = s.today_lesson
+        ? `<div style="font-size:12px;color:var(--dark);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.today_lesson}</div>`
+        : '<span style="color:var(--muted);font-size:12px">–</span>';
+      const foto = s.foto_url
+        ? `<img src="${s.foto_url}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:pointer;margin-top:4px;display:block" onclick="openFotoAdmin('${s.foto_url}')" title="Lihat foto">`
+        : '';
       return `<tr>
         <td>${s.tanggal || '–'}</td>
         <td>${guru.nama || '–'}</td>
         <td><b>${murid.nama || '–'}</b></td>
         <td><span class="badge ${progBadgeClass(murid.program)}">${murid.program || '–'}</span></td>
-        <td style="max-width:200px;color:var(--muted)">${s.catatan || '–'}</td>
+        <td>${materi}${foto}</td>
         <td><button class="btn btn-sm btn-danger" onclick="hapusSesi('${s.id}')">🗑️</button></td>
       </tr>`;
     }).join('');
   } catch(e) {
     tb.innerHTML = `<tr><td colspan="6" style="text-align:center;color:red;padding:16px">${e.message}</td></tr>`;
   }
+}
+
+function openFotoAdmin(url) {
+  document.getElementById('fotoAdminFull').src = url;
+  openModal('modalFotoAdmin');
 }
 
 async function hapusSesi(id) {
@@ -979,10 +1000,13 @@ async function showDetailSesi(guruId, guruNama, bulan) {
     el.innerHTML = Object.entries(byMurid).map(([nm, {murid, sesi: ss}]) => `
       <div style="border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px">
         <div style="font-weight:800;margin-bottom:8px">${nm} <span class="badge ${progBadgeClass(murid.program)}">${murid.program||''}</span></div>
-        <div>${ss.sort((a,b)=>a.tanggal>b.tanggal?1:-1).map(s =>
-          `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
-            <span>📅 ${s.tanggal}</span>
-            <span style="color:var(--muted)">${s.catatan||''}</span>
+        <div>${ss.sort((a,b)=>a.tanggal>b.tanggal?1:-1).map(s => `
+          <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+            <div style="display:flex;justify-content:space-between">
+              <span>📅 ${s.tanggal}</span>
+              ${s.foto_url ? `<img src="${s.foto_url}" style="width:40px;height:40px;object-fit:cover;border-radius:7px;cursor:pointer" onclick="openFotoAdmin('${s.foto_url}')">` : ''}
+            </div>
+            ${s.today_lesson ? `<div style="color:var(--muted);font-size:12px;margin-top:3px">📖 ${s.today_lesson}</div>` : ''}
           </div>`
         ).join('')}</div>
         <div style="margin-top:8px;font-size:13px;color:var(--muted)">Total: <b>${ss.length} sesi</b></div>

@@ -13,7 +13,7 @@
   --red:#EF4444;--muted:#6B7280;--border:#E5E7EB;--white:#FFFFFF;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--dark);min-height:100vh;padding-bottom:72px}
 input,select,textarea,button{font-family:'Nunito',sans-serif}
 
 /* LOGIN */
@@ -24,39 +24,33 @@ input,select,textarea,button{font-family:'Nunito',sans-serif}
 .login-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
 .form-group{text-align:left;margin-bottom:14px}
 .form-group label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-.form-group input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:16px;font-weight:700;color:var(--dark);outline:none;text-align:center;letter-spacing:4px;text-transform:uppercase;transition:border-color .2s}
+.form-group input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:18px;font-weight:800;color:var(--dark);outline:none;text-align:center;letter-spacing:4px;text-transform:uppercase;transition:border-color .2s}
 .form-group input:focus{border-color:var(--teal)}
-.btn-login{width:100%;background:var(--teal);color:#fff;border:none;padding:13px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;margin-top:6px}
-.btn-login:hover{background:#0F766E;transform:translateY(-1px)}
+.btn-login{width:100%;background:var(--teal);color:#fff;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;margin-top:4px}
+.btn-login:hover{background:#0F766E}
 .login-err{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);display:none;margin-bottom:12px;text-align:center}
 
 /* LOADING */
-#loadingOverlay{position:fixed;inset:0;background:rgba(28,16,38,.85);z-index:999;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#loadingOverlay{position:fixed;inset:0;background:rgba(28,16,38,.85);z-index:998;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
 .spinner-big{width:44px;height:44px;border:4px solid rgba(13,148,136,.3);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #loadingOverlay p{color:#fff;font-weight:700}
 
 /* HEADER */
-.app-header{background:var(--dark);height:58px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100}
-.logo-mark{width:36px;height:36px;background:var(--teal);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:18px;color:#fff;flex-shrink:0}
+.app-header{background:var(--dark);height:58px;display:flex;align-items:center;padding:0 16px;gap:10px;position:sticky;top:0;z-index:100}
+.logo-mark{width:34px;height:34px;background:var(--teal);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:16px;color:#fff;flex-shrink:0}
 .app-title{font-family:'Fredoka One',cursive;font-size:18px;color:#fff}
-.app-sub{font-size:11px;color:#9CA3AF;margin-top:-2px}
-.guru-badge{margin-left:auto;background:var(--teal);color:#fff;padding:4px 14px;border-radius:999px;font-size:12px;font-weight:800}
-.btn-logout{background:rgba(255,255,255,.1);color:#D1D5DB;border:1px solid rgba(255,255,255,.15);padding:6px 14px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;margin-left:8px}
+.app-sub{font-size:10px;color:#9CA3AF;margin-top:-2px}
+.guru-badge{margin-left:auto;background:var(--teal);color:#fff;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.btn-logout{background:rgba(255,255,255,.1);color:#D1D5DB;border:1px solid rgba(255,255,255,.15);padding:6px 12px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;margin-left:6px;flex-shrink:0}
 .btn-logout:hover{background:var(--red);color:#fff;border-color:transparent}
 
 /* HERO */
-.hero{background:linear-gradient(135deg,var(--dark) 0%,#2D1B4E 100%);padding:28px 20px 32px;text-align:center}
-.hero-name{font-family:'Fredoka One',cursive;font-size:26px;color:#fff;margin-bottom:4px}
-.hero-sub{font-size:13px;color:#A78BFA;margin-bottom:10px}
-.hero-date{display:inline-block;background:rgba(13,148,136,.2);border:1px solid rgba(13,148,136,.4);border-radius:999px;padding:5px 14px;font-size:12px;font-weight:700;color:#5EEAD4;margin-top:8px}
-.hero-chips{display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap}
-.hero-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;color:#D1D5DB}
-
-/* MAIN */
-main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
-.card{background:var(--white);border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.card-title{font-weight:800;font-size:15px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.hero{background:linear-gradient(135deg,var(--dark) 0%,#2D1B4E 100%);padding:24px 16px 28px;text-align:center}
+.hero-name{font-family:'Fredoka One',cursive;font-size:24px;color:#fff;margin-bottom:4px}
+.hero-sub{font-size:12px;color:#A78BFA;margin-bottom:10px}
+.hero-chips{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.hero-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;color:#D1D5DB}
 
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--dark);border-top:1px solid #2D1B4E;display:flex;z-index:100}
@@ -66,65 +60,88 @@ main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
 .nav-label{font-size:10px;font-weight:700}
 .tab-page{display:none}.tab-page.active{display:block}
 
-/* FORMS */
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-@media(max-width:480px){.form-row{grid-template-columns:1fr}}
-.form-field label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
-.form-field select,.form-field input,.form-field textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-weight:600;color:var(--dark);outline:none;background:var(--white);transition:border-color .2s}
-.form-field select:focus,.form-field input:focus,.form-field textarea:focus{border-color:var(--teal)}
-.form-field textarea{resize:vertical;min-height:70px}
+/* MAIN */
+main{max-width:680px;margin:0 auto;padding:16px 14px 16px}
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:11px;font-size:13px;font-weight:800;border:none;cursor:pointer;transition:all .2s}
-.btn-primary{background:var(--teal);color:#fff}.btn-primary:hover{background:#0F766E}
-.btn-dark{background:var(--dark);color:#fff}.btn-dark:hover{background:#2D1B4E}
-.btn-full{width:100%;justify-content:center;padding:13px}
-.btn-sm{padding:5px 10px;font-size:11px;border-radius:8px}
-.btn-danger{background:#FEF2F2;color:var(--red);border:1px solid #FECACA}.btn-danger:hover{background:var(--red);color:#fff}
+/* CARDS */
+.section-card{background:var(--white);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.card-title{font-weight:800;font-size:14px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 
-/* SESI ENTRY */
-.murid-sesi-card{border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;background:var(--white)}
-.murid-sesi-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer}
-.murid-sesi-name{font-weight:800;font-size:14px}
-.murid-sesi-prog{font-size:11px;color:var(--muted);font-weight:600}
-.murid-sesi-count{background:var(--teal);color:#fff;border-radius:999px;padding:3px 12px;font-size:12px;font-weight:800}
-.sesi-dates{margin-top:4px}
-.sesi-date-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.sesi-date-row input{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;color:var(--dark);outline:none}
-.sesi-date-row input:focus{border-color:var(--teal)}
-.sesi-date-row .catatan-input{flex:2}
-.btn-add-tgl{background:#F0FDFA;color:var(--teal);border:1.5px solid #CCFBF1;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .2s;margin-top:4px}
-.btn-add-tgl:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+/* FEE BANNER */
+.fee-banner{background:linear-gradient(135deg,var(--teal) 0%,#0F766E 100%);border-radius:16px;padding:16px 18px;color:#fff;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.fee-label{font-size:11px;opacity:.8;margin-bottom:2px}
+.fee-val{font-family:'Fredoka One',cursive;font-size:28px}
+.fee-detail{font-size:11px;opacity:.75}
+
+/* MURID CARD DI BERANDA */
+.murid-kbm-card{background:var(--white);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:12px}
+.murid-avatar{width:44px;height:44px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:18px;flex-shrink:0}
+.murid-info{flex:1;min-width:0}
+.murid-nama{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.murid-prog{font-size:11px;color:var(--muted);margin-top:1px}
+.murid-sisa{font-size:11px;font-weight:700;margin-top:3px}
+.btn-input-kbm{background:var(--teal);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;transition:all .2s;display:flex;align-items:center;gap:5px}
+.btn-input-kbm:hover{background:#0F766E;transform:scale(1.03)}
+
+/* HISTORI SESI */
+.sesi-card{border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px}
+.sesi-head{padding:12px 14px;background:var(--bg);display:flex;align-items:center;justify-content:space-between}
+.sesi-tgl{font-weight:800;font-size:14px}
+.sesi-murid{font-size:12px;color:var(--muted);margin-top:2px}
+.sesi-body{padding:12px 14px;border-top:1px solid var(--border)}
+.sesi-lesson{font-size:13px;color:var(--dark);line-height:1.5;margin-bottom:8px}
+.sesi-foto{width:100%;max-height:200px;object-fit:cover;border-radius:8px;cursor:pointer}
+.sesi-foto-placeholder{background:var(--bg);border-radius:8px;padding:20px;text-align:center;color:var(--muted);font-size:12px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:flex-end;justify-content:center;padding:0}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--white);border-radius:24px 24px 0 0;padding:24px 20px 32px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;position:relative}
+.modal-drag{width:40px;height:4px;background:var(--border);border-radius:999px;margin:0 auto 16px}
+.modal-title{font-weight:800;font-size:18px;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+
+/* FORM */
+.form-field{margin-bottom:14px}
+.form-field label{font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-field input,.form-field select,.form-field textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-weight:600;color:var(--dark);outline:none;background:var(--white);transition:border-color .2s}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--teal)}
+.form-field textarea{resize:vertical;min-height:90px}
+
+/* UPLOAD FOTO */
+.upload-area{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--bg)}
+.upload-area:hover{border-color:var(--teal);background:#F0FDFA}
+.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:10px;display:none}
+.upload-progress{display:none;margin-top:8px;font-size:12px;font-weight:700;color:var(--teal)}
 
 /* BADGES */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
 .badge-green{background:#ECFDF5;color:var(--green)}
-.badge-gray{background:#F3F4F6;color:var(--muted)}
 .badge-teal{background:#F0FDFA;color:var(--teal)}
-.badge-purple{background:#F5F3FF;color:var(--purple2)}
+.badge-red{background:#FEF2F2;color:var(--red)}
+.badge-yellow{background:#FFFBEB;color:var(--gold2)}
 .prog-online{background:#EEF2FF;color:#4338CA}
 .prog-regular{background:#F0FDFA;color:var(--teal)}
 .prog-home{background:#FFF7ED;color:#C2410C}
 .prog-group{background:#F0FDF4;color:#166534}
 .prog-choir{background:#FDF4FF;color:#7E22CE}
 
-/* FEE CARD */
-.fee-summary{background:linear-gradient(135deg,var(--teal) 0%,#0F766E 100%);border-radius:16px;padding:20px;color:#fff;margin-bottom:16px}
-.fee-label{font-size:12px;opacity:.8;margin-bottom:4px}
-.fee-val{font-family:'Fredoka One',cursive;font-size:36px;line-height:1}
-.fee-detail{font-size:13px;opacity:.8;margin-top:6px}
-
-/* SAVED BANNER */
-.saved-banner{background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:14px;padding:14px 18px;display:none;margin-bottom:14px;align-items:center;gap:12px;font-weight:700;color:var(--green)}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:11px;font-size:14px;font-weight:800;border:none;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--teal);color:#fff}.btn-primary:hover{background:#0F766E}
+.btn-full{width:100%;justify-content:center;padding:14px}
+.btn-dark{background:var(--dark);color:#fff}.btn-dark:hover{background:#2D1B4E}
 
 /* TOAST */
-#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--dark);color:#fff;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:700;z-index:9999;transition:transform .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--dark);color:#fff;padding:12px 22px;border-radius:999px;font-size:13px;font-weight:700;z-index:9999;transition:transform .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3);pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0)}
 #toast.success{background:var(--green)}
 #toast.error{background:var(--red)}
 
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(13,148,136,.3);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
-.empty-state{text-align:center;padding:24px;color:var(--muted);font-size:14px;font-weight:600}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(13,148,136,.3);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+.empty-state{text-align:center;padding:28px;color:var(--muted);font-size:14px;font-weight:600}
 </style>
 </head>
 <body>
@@ -135,10 +152,12 @@ main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
     <div class="login-mark">🎼</div>
     <div class="login-title">Portal Guru</div>
     <div class="login-sub">Dedi Vocal Academy (DiVA)</div>
-    <div class="login-err" id="loginErr">Kode guru tidak ditemukan. Coba lagi.</div>
+    <div class="login-err" id="loginErr">Kode tidak ditemukan.</div>
     <div class="form-group">
       <label>Kode Guru</label>
-      <input type="text" id="kodeInput" placeholder="GURU01" maxlength="10" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="text" id="kodeInput" placeholder="GURU01" maxlength="10"
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <button class="btn-login" onclick="doLogin()">Masuk →</button>
     <p style="font-size:12px;color:var(--muted);margin-top:14px">Kode diberikan oleh Admin DiVA</p>
@@ -148,11 +167,11 @@ main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
 <!-- LOADING -->
 <div id="loadingOverlay">
   <div class="spinner-big"></div>
-  <p>Memuat data...</p>
+  <p id="loadingText">Memuat data...</p>
 </div>
 
 <!-- APP -->
-<div id="appShell" style="display:none;min-height:100vh">
+<div id="appShell" style="display:none">
   <header class="app-header">
     <div class="logo-mark">D</div>
     <div><div class="app-title">DiVA</div><div class="app-sub">Portal Guru</div></div>
@@ -161,82 +180,108 @@ main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
   </header>
 
   <div class="hero">
-    <div class="hero-name" id="heroNama">Halo, Guru!</div>
+    <div class="hero-name" id="heroNama">Halo!</div>
     <div class="hero-sub">Dedi Vocal Academy</div>
-    <div class="hero-date" id="heroDate">–</div>
     <div class="hero-chips">
-      <span class="hero-chip" id="chipSesiTotal">– sesi bulan ini</span>
+      <span class="hero-chip" id="chipSesi">– sesi bln ini</span>
       <span class="hero-chip" id="chipMurid">– murid</span>
+      <span class="hero-chip" id="chipFee">Fee: –</span>
     </div>
   </div>
 
   <main>
+
     <!-- BERANDA -->
     <div class="tab-page active" id="tab-beranda">
-      <div class="fee-summary">
-        <div class="fee-label">Estimasi Fee Bulan Ini</div>
-        <div class="fee-val" id="feeEstimasi">Rp –</div>
-        <div class="fee-detail" id="feeDetail">– sesi × –</div>
+      <div class="fee-banner">
+        <div>
+          <div class="fee-label">Estimasi Fee Bulan Ini</div>
+          <div class="fee-val" id="feeEstimasi">Rp –</div>
+          <div class="fee-detail" id="feeDetail">– sesi × –</div>
+        </div>
+        <span style="font-size:36px">💰</span>
       </div>
 
-      <div class="card">
-        <div class="card-title">👨‍🎓 Murid Saya</div>
+      <div class="section-card">
+        <div class="card-title">👨‍🎓 Murid Saya — Tap untuk Input KBM</div>
         <div id="berandaMuridList"><span class="spinner"></span></div>
       </div>
 
-      <div class="card">
-        <div class="card-title">📅 Sesi Terakhir (Bulan Ini)</div>
+      <div class="section-card">
+        <div class="card-title">📅 Sesi Terakhir</div>
         <div id="berandaSesiRecent"><span class="spinner"></span></div>
       </div>
     </div>
 
-    <!-- INPUT SESI -->
-    <div class="tab-page" id="tab-sesi">
-      <div class="saved-banner" id="savedBanner">
-        <span>✅</span>
-        <div><div>Laporan berhasil disimpan!</div><div style="font-size:12px;font-weight:600;opacity:.8">Data sesi sudah masuk ke sistem DiVA</div></div>
+    <!-- HISTORI -->
+    <div class="tab-page" id="tab-histori">
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+        <input type="month" id="filtHistoriBulan" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;outline:none" onchange="loadHistori()">
+        <button onclick="loadHistori()" style="background:var(--teal);color:#fff;border:none;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">Filter</button>
       </div>
-
-      <div class="card">
-        <div class="card-title">📋 Input Laporan Sesi</div>
-        <div class="form-row" style="margin-bottom:14px">
-          <div class="form-field">
-            <label>Bulan Laporan</label>
-            <input type="month" id="sesisBulan">
-          </div>
-          <div style="display:flex;align-items:flex-end">
-            <button class="btn btn-primary" onclick="loadSesiForm()">🔄 Muat Data</button>
-          </div>
-        </div>
-        <div id="sesiFormContent">
-          <div class="empty-state">Pilih bulan lalu klik "Muat Data"</div>
-        </div>
-        <div id="sesiFormAction" style="display:none;margin-top:14px">
-          <button class="btn btn-primary btn-full" onclick="saveSemua()">💾 Simpan Semua Laporan</button>
-        </div>
-      </div>
+      <div id="historiContent"><span class="spinner"></span></div>
     </div>
 
-    <!-- FEE SAYA -->
+    <!-- FEE -->
     <div class="tab-page" id="tab-fee">
-      <div class="card">
-        <div class="card-title">💰 Rekap Fee Saya</div>
-        <div class="form-row" style="margin-bottom:14px">
-          <div class="form-field">
-            <label>Pilih Bulan</label>
-            <input type="month" id="feeBulan" onchange="loadFeeRekap()">
-          </div>
-        </div>
-        <div id="feeRekapContent"><span class="spinner"></span></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+        <input type="month" id="feeBulan" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;outline:none" onchange="loadFeeRekap()">
+        <button onclick="loadFeeRekap()" style="background:var(--teal);color:#fff;border:none;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">Lihat</button>
       </div>
+      <div id="feeRekapContent"><span class="spinner"></span></div>
     </div>
+
   </main>
 
   <nav class="bottom-nav">
     <button class="nav-item active" onclick="showPage('beranda',this)"><span class="nav-icon">🏠</span><span class="nav-label">Beranda</span></button>
-    <button class="nav-item" onclick="showPage('sesi',this)"><span class="nav-icon">📋</span><span class="nav-label">Input Sesi</span></button>
+    <button class="nav-item" onclick="showPage('histori',this)"><span class="nav-icon">📋</span><span class="nav-label">Histori KBM</span></button>
     <button class="nav-item" onclick="showPage('fee',this)"><span class="nav-icon">💰</span><span class="nav-label">Fee Saya</span></button>
   </nav>
+</div>
+
+<!-- MODAL INPUT KBM -->
+<div class="modal-overlay" id="modalKBM">
+  <div class="modal-box">
+    <div class="modal-drag"></div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">📋 Input KBM</div>
+    <div class="modal-sub" id="kbmMuridLabel">–</div>
+
+    <div class="form-field">
+      <label>Tanggal KBM</label>
+      <input type="date" id="kbmTanggal">
+    </div>
+
+    <div class="form-field">
+      <label>Today's Lesson</label>
+      <textarea id="kbmLesson" placeholder="Materi yang diajarkan hari ini..."></textarea>
+    </div>
+
+    <div class="form-field">
+      <label>Foto KBM (opsional)</label>
+      <div class="upload-area" id="uploadArea">
+        <input type="file" id="kbmFoto" accept="image/*" onchange="previewFoto(this)">
+        <div id="uploadPlaceholder">
+          <div style="font-size:32px;margin-bottom:6px">📷</div>
+          <div style="font-size:13px;font-weight:700;color:var(--muted)">Tap untuk pilih foto</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">JPG, PNG maks 5MB</div>
+        </div>
+        <img id="fotoPreview" class="upload-preview">
+      </div>
+      <div class="upload-progress" id="uploadProgress">⏫ Mengupload foto ke Drive...</div>
+    </div>
+
+    <button class="btn btn-primary btn-full" id="btnSimpanKBM" onclick="simpanKBM()">💾 Simpan KBM</button>
+    <button class="btn btn-dark btn-full" style="margin-top:8px" onclick="closeModal()">Batal</button>
+  </div>
+</div>
+
+<!-- MODAL LIHAT FOTO BESAR -->
+<div class="modal-overlay" id="modalFoto" onclick="closeModalFoto()">
+  <div style="max-width:600px;width:100%;padding:20px">
+    <img id="fotoFull" style="width:100%;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.5)">
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -244,21 +289,19 @@ main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
 <script>
 let currentGuru  = null;
 let muridSaya    = [];
-let sesiData     = {};   // { muridId: [{ tanggal, catatan }] }
+let kbmMuridId   = null;
 let pageLoaded   = {};
 
-function showLoading(v) {
+function showLoading(v, txt='Memuat data...') {
   document.getElementById('loadingOverlay').style.display = v ? 'flex' : 'none';
+  document.getElementById('loadingText').textContent = txt;
 }
 function toast(msg, type='') {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show ' + type;
+  t.textContent = msg; t.className = 'show ' + type;
   setTimeout(() => t.className = '', 3000);
 }
-function fmt(n) {
-  return 'Rp ' + Number(n||0).toLocaleString('id-ID');
-}
+function fmt(n) { return 'Rp ' + Number(n||0).toLocaleString('id-ID'); }
 function thisBulan() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
@@ -266,11 +309,18 @@ function thisBulan() {
 function progBadgeClass(prog) {
   if (!prog) return '';
   const p = prog.toLowerCase();
-  if (p.includes('online'))  return 'prog-online';
-  if (p.includes('home'))    return 'prog-home';
-  if (p.includes('group'))   return 'prog-group';
-  if (p.includes('choir'))   return 'prog-choir';
+  if (p.includes('online')) return 'prog-online';
+  if (p.includes('home'))   return 'prog-home';
+  if (p.includes('group'))  return 'prog-group';
+  if (p.includes('choir'))  return 'prog-choir';
   return 'prog-regular';
+}
+function sisaColor(sisa, paket) {
+  if (!paket) return 'badge-teal';
+  const pct = sisa / paket;
+  if (pct <= 0)    return 'badge-red';
+  if (pct <= 0.25) return 'badge-yellow';
+  return 'badge-green';
 }
 
 // ─── AUTH ───────────────────────────────────────────
@@ -280,20 +330,18 @@ async function doLogin() {
   showLoading(true);
   document.getElementById('loginErr').style.display = 'none';
   try {
-    const guru = await API.getGuruByKode(kode);
-    if (!guru) throw new Error('Kode tidak ditemukan');
-    currentGuru = guru;
+    currentGuru = await API.getGuruByKode(kode);
     document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('appShell').style.display = 'block';
+    document.getElementById('appShell').style.display    = 'block';
     initApp();
   } catch(e) {
     showLoading(false);
     document.getElementById('loginErr').style.display = 'block';
-    document.getElementById('loginErr').textContent = e.message || 'Kode guru tidak ditemukan.';
+    document.getElementById('loginErr').textContent   = e.message;
   }
 }
 function doLogout() {
-  currentGuru = null; muridSaya = []; sesiData = {}; pageLoaded = {};
+  currentGuru = null; muridSaya = []; kbmMuridId = null; pageLoaded = {};
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('appShell').style.display    = 'none';
   document.getElementById('kodeInput').value = '';
@@ -303,66 +351,174 @@ function doLogout() {
 async function initApp() {
   showLoading(true);
   try {
-    // Set UI basics
-    document.getElementById('guruBadge').textContent  = currentGuru.nama;
-    document.getElementById('heroNama').textContent   = 'Halo, ' + currentGuru.nama.split(' ')[0] + '!';
-    const now = new Date();
-    document.getElementById('heroDate').textContent   = now.toLocaleDateString('id-ID', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    document.getElementById('guruBadge').textContent = currentGuru.nama;
+    document.getElementById('heroNama').textContent  = 'Halo, ' + currentGuru.nama.split(' ')[0] + '!';
 
-    // Set month defaults
     const bln = thisBulan();
-    document.getElementById('sesisBulan').value = bln;
-    document.getElementById('feeBulan').value   = bln;
+    document.getElementById('filtHistoriBulan').value = bln;
+    document.getElementById('feeBulan').value         = bln;
 
-    // Load murid
-    const allMurid = await API.getMurid() || [];
-    muridSaya = allMurid.filter(m => m.guru_id === currentGuru.id);
+    const [allMurid, sesi] = await Promise.all([
+      API.getMurid(),
+      API.getSesi({ guru_id: currentGuru.id, bulan: bln }),
+    ]);
+    muridSaya = (allMurid || []).filter(m => m.guru_id === currentGuru.id);
+
+    const totalSesi = (sesi || []).length;
+    const totalFee  = totalSesi * Number(currentGuru.fee_per_sesi || 0);
     document.getElementById('chipMurid').textContent = muridSaya.length + ' murid';
-
-    // Load sesi bulan ini
-    const sesi = await API.getSesi({ guru_id: currentGuru.id, bulan: bln }) || [];
-    document.getElementById('chipSesiTotal').textContent = sesi.length + ' sesi bulan ini';
-
-    const totalFee = sesi.length * Number(currentGuru.fee_per_sesi || 0);
+    document.getElementById('chipSesi').textContent  = totalSesi + ' sesi bln ini';
+    document.getElementById('chipFee').textContent   = 'Fee: Rp ' + Math.round(totalFee/1000) + 'rb';
     document.getElementById('feeEstimasi').textContent = fmt(totalFee);
-    document.getElementById('feeDetail').textContent   = `${sesi.length} sesi × ${fmt(currentGuru.fee_per_sesi)}`;
+    document.getElementById('feeDetail').textContent   = totalSesi + ' sesi × ' + fmt(currentGuru.fee_per_sesi);
 
     renderBerandaMurid();
-    renderBerandaSesi(sesi);
+    renderBerandaSesi(sesi || []);
     showLoading(false);
-    pageLoaded['beranda'] = true;
+    pageLoaded.beranda = true;
   } catch(e) {
     showLoading(false);
-    toast('Gagal memuat data: ' + e.message, 'error');
+    toast('Gagal memuat: ' + e.message, 'error');
   }
 }
 
+// ─── BERANDA ────────────────────────────────────────
 function renderBerandaMurid() {
   const el = document.getElementById('berandaMuridList');
-  if (!muridSaya.length) { el.innerHTML = '<div class="empty-state">Belum ada murid terdaftar</div>'; return; }
-  el.innerHTML = muridSaya.map(m => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-      <div>
-        <div style="font-weight:800;font-size:14px">${m.nama}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px">${m.no_hp || '–'}</div>
+  if (!muridSaya.length) {
+    el.innerHTML = '<div class="empty-state">Belum ada murid yang ditugaskan</div>';
+    return;
+  }
+  el.innerHTML = muridSaya.map(m => {
+    const sisa  = Number(m.sisa_sesi  ?? '–');
+    const paket = Number(m.paket_sesi || 0);
+    const sisaTxt = paket ? `${sisa} / ${paket} sesi tersisa` : 'Belum ada paket';
+    const col   = sisaColor(sisa, paket);
+    return `
+    <div class="murid-kbm-card">
+      <div class="murid-avatar">${m.nama.charAt(0)}</div>
+      <div class="murid-info">
+        <div class="murid-nama">${m.nama}</div>
+        <div class="murid-prog"><span class="badge ${progBadgeClass(m.program)}">${m.program||'–'}</span></div>
+        <div class="murid-sisa"><span class="badge ${col}">🎯 ${sisaTxt}</span></div>
       </div>
-      <span class="badge ${progBadgeClass(m.program)}">${m.program || '–'}</span>
-    </div>
-  `).join('');
+      <button class="btn-input-kbm" onclick="openKBM('${m.id}','${m.nama.replace(/'/g,"\\'")}')">
+        ➕ Input KBM
+      </button>
+    </div>`;
+  }).join('');
 }
 
 function renderBerandaSesi(sesiList) {
   const el = document.getElementById('berandaSesiRecent');
-  if (!sesiList.length) { el.innerHTML = '<div class="empty-state">Belum ada sesi bulan ini</div>'; return; }
-  const sorted = [...sesiList].sort((a,b) => b.tanggal > a.tanggal ? 1 : -1).slice(0,8);
-  el.innerHTML = sorted.map(s => {
+  const recent = [...sesiList].sort((a,b) => b.tanggal > a.tanggal ? 1 : -1).slice(0,5);
+  if (!recent.length) { el.innerHTML = '<div class="empty-state">Belum ada sesi bulan ini</div>'; return; }
+  el.innerHTML = recent.map(s => {
     const m = muridSaya.find(x => x.id === s.murid_id) || {};
-    return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px">
-      <span>📅 <b>${s.tanggal}</b></span>
-      <span>${m.nama || '–'}</span>
-      <span style="color:var(--muted)">${s.catatan ? s.catatan.substring(0,20)+'…' : ''}</span>
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <div>
+        <b>${s.tanggal}</b>
+        <span style="color:var(--muted);margin-left:8px">${m.nama || '–'}</span>
+      </div>
+      ${s.foto_url ? '<span style="font-size:16px">📷</span>' : ''}
     </div>`;
   }).join('');
+}
+
+// ─── INPUT KBM MODAL ────────────────────────────────
+function openKBM(muridId, muridNama) {
+  kbmMuridId = muridId;
+  document.getElementById('kbmMuridLabel').textContent = muridNama;
+  // Default tanggal = hari ini
+  document.getElementById('kbmTanggal').value = new Date().toISOString().split('T')[0];
+  document.getElementById('kbmLesson').value  = '';
+  document.getElementById('kbmFoto').value    = '';
+  document.getElementById('fotoPreview').style.display = 'none';
+  document.getElementById('uploadPlaceholder').style.display = 'block';
+  document.getElementById('uploadProgress').style.display = 'none';
+  document.getElementById('btnSimpanKBM').disabled = false;
+  document.getElementById('modalKBM').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalKBM').classList.remove('open');
+  kbmMuridId = null;
+}
+
+function previewFoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    toast('Foto max 5MB', 'error');
+    input.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('fotoPreview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('uploadPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function simpanKBM() {
+  if (!kbmMuridId) return;
+  const tanggal = document.getElementById('kbmTanggal').value;
+  const lesson  = document.getElementById('kbmLesson').value.trim();
+  const fotoEl  = document.getElementById('kbmFoto');
+  if (!tanggal) return toast('Tanggal wajib diisi', 'error');
+
+  const btn = document.getElementById('btnSimpanKBM');
+  btn.disabled = true;
+
+  let fotoUrl = '';
+  const file = fotoEl.files[0];
+  if (file) {
+    document.getElementById('uploadProgress').style.display = 'block';
+    try {
+      const result = await API.uploadFotoKBM(file);
+      fotoUrl = result.url || '';
+    } catch(e) {
+      toast('Upload foto gagal: ' + e.message, 'error');
+      document.getElementById('uploadProgress').style.display = 'none';
+      btn.disabled = false;
+      return;
+    }
+    document.getElementById('uploadProgress').style.display = 'none';
+  }
+
+  try {
+    await API.addKBM({
+      guru_id:      currentGuru.id,
+      murid_id:     kbmMuridId,
+      tanggal,
+      today_lesson: lesson,
+      foto_url:     fotoUrl,
+    });
+
+    toast('KBM berhasil disimpan! ✅', 'success');
+    closeModal();
+
+    // Refresh beranda
+    const bln  = thisBulan();
+    const sesi = await API.getSesi({ guru_id: currentGuru.id, bulan: bln }) || [];
+    const totalSesi = sesi.length;
+    const totalFee  = totalSesi * Number(currentGuru.fee_per_sesi || 0);
+    document.getElementById('chipSesi').textContent    = totalSesi + ' sesi bln ini';
+    document.getElementById('chipFee').textContent     = 'Fee: Rp ' + Math.round(totalFee/1000) + 'rb';
+    document.getElementById('feeEstimasi').textContent = fmt(totalFee);
+    document.getElementById('feeDetail').textContent   = totalSesi + ' sesi × ' + fmt(currentGuru.fee_per_sesi);
+    renderBerandaSesi(sesi);
+
+    // Refresh sisa sesi murid
+    const allMurid = await API.getMurid() || [];
+    muridSaya = allMurid.filter(m => m.guru_id === currentGuru.id);
+    renderBerandaMurid();
+  } catch(e) {
+    toast(e.message, 'error');
+  }
+  btn.disabled = false;
 }
 
 // ─── TABS ───────────────────────────────────────────
@@ -371,150 +527,59 @@ function showPage(id, btn) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   btn.classList.add('active');
-  if (!pageLoaded[id]) {
-    pageLoaded[id] = true;
-    if (id === 'fee') loadFeeRekap();
-  }
+  if (!pageLoaded[id]) { pageLoaded[id] = true; if (id==='fee') loadFeeRekap(); }
+  if (id === 'histori') loadHistori();
 }
 
-// ─── INPUT SESI ─────────────────────────────────────
-async function loadSesiForm() {
-  const bulan = document.getElementById('sesisBulan').value;
-  if (!bulan) return toast('Pilih bulan dulu', 'error');
-  const el    = document.getElementById('sesiFormContent');
-  const actEl = document.getElementById('sesiFormAction');
+// ─── HISTORI KBM ────────────────────────────────────
+async function loadHistori() {
+  const bulan = document.getElementById('filtHistoriBulan').value || thisBulan();
+  const el    = document.getElementById('historiContent');
   el.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span></div>';
-  actEl.style.display = 'none';
-  sesiData = {};
-
   try {
-    // Get existing sesi for this bulan
-    const existing = await API.getSesi({ guru_id: currentGuru.id, bulan }) || [];
+    const sesi = await API.getSesi({ guru_id: currentGuru.id, bulan }) || [];
+    if (!sesi.length) { el.innerHTML = '<div class="empty-state">Belum ada KBM di bulan ini</div>'; return; }
 
-    if (!muridSaya.length) {
-      el.innerHTML = '<div class="empty-state">Belum ada murid yang ditugaskan</div>';
-      return;
-    }
-
-    // Build sesiData from existing
-    existing.forEach(s => {
-      if (!sesiData[s.murid_id]) sesiData[s.murid_id] = [];
-      sesiData[s.murid_id].push({ id: s.id, tanggal: s.tanggal, catatan: s.catatan || '', saved: true });
-    });
-
-    // Initialize empty for murid yang belum ada
-    muridSaya.forEach(m => {
-      if (!sesiData[m.id]) sesiData[m.id] = [];
-    });
-
-    el.innerHTML = muridSaya.map(m => renderMuridSesiCard(m, bulan)).join('');
-    actEl.style.display = 'block';
+    el.innerHTML = sesi.map(s => {
+      const m = muridSaya.find(x => x.id === s.murid_id) || {};
+      return `
+      <div class="sesi-card">
+        <div class="sesi-head">
+          <div>
+            <div class="sesi-tgl">📅 ${s.tanggal}</div>
+            <div class="sesi-murid">${m.nama || '–'} · <span class="badge ${progBadgeClass(m.program)}">${m.program||''}</span></div>
+          </div>
+          <button onclick="hapusSesi('${s.id}')" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted)">🗑️</button>
+        </div>
+        ${(s.today_lesson || s.foto_url) ? `
+        <div class="sesi-body">
+          ${s.today_lesson ? `<div class="sesi-lesson">📖 <b>Materi:</b> ${s.today_lesson}</div>` : ''}
+          ${s.foto_url
+            ? `<img src="${s.foto_url}" class="sesi-foto" onclick="lihatFoto('${s.foto_url}')" alt="Foto KBM">`
+            : '<div class="sesi-foto-placeholder">📷 Tidak ada foto</div>'}
+        </div>` : ''}
+      </div>`;
+    }).join('');
   } catch(e) {
     el.innerHTML = '<div style="color:red;text-align:center">' + e.message + '</div>';
-    toast(e.message, 'error');
   }
 }
 
-function renderMuridSesiCard(murid, bulan) {
-  const rows = sesiData[murid.id] || [];
-  return `
-  <div class="murid-sesi-card" id="murid-card-${murid.id}">
-    <div class="murid-sesi-head" onclick="toggleSesiMurid('${murid.id}')">
-      <div>
-        <div class="murid-sesi-name">${murid.nama}</div>
-        <div class="murid-sesi-prog">${murid.program || '–'}</div>
-      </div>
-      <span class="murid-sesi-count" id="count-${murid.id}">${rows.length} sesi</span>
-    </div>
-    <div class="sesi-dates" id="sesi-body-${murid.id}">
-      ${rows.map((r,i) => renderSesiRow(murid.id, i, r.tanggal, r.catatan)).join('')}
-      <button class="btn-add-tgl" onclick="addSesiRow('${murid.id}','${bulan}')">➕ Tambah Tanggal Sesi</button>
-    </div>
-  </div>`;
-}
-
-function renderSesiRow(muridId, idx, tanggal='', catatan='') {
-  return `<div class="sesi-date-row" id="row-${muridId}-${idx}">
-    <input type="date" value="${tanggal}" onchange="updateSesiData('${muridId}',${idx},'tanggal',this.value)">
-    <input type="text" class="catatan-input" placeholder="Catatan (opsional)..." value="${catatan}" oninput="updateSesiData('${muridId}',${idx},'catatan',this.value)">
-    <button class="btn btn-sm btn-danger" onclick="removeSesiRow('${muridId}',${idx})">✕</button>
-  </div>`;
-}
-
-function addSesiRow(muridId, bulan) {
-  const body    = document.getElementById('sesi-body-' + muridId);
-  const idx     = (sesiData[muridId] || []).length;
-  if (!sesiData[muridId]) sesiData[muridId] = [];
-  sesiData[muridId].push({ tanggal: '', catatan: '' });
-
-  // Insert before the button
-  const btn = body.querySelector('.btn-add-tgl');
-  const div = document.createElement('div');
-  div.innerHTML = renderSesiRow(muridId, idx, '', '');
-  body.insertBefore(div.firstElementChild, btn);
-  updateCount(muridId);
-}
-
-function updateSesiData(muridId, idx, key, val) {
-  if (!sesiData[muridId]) sesiData[muridId] = [];
-  if (!sesiData[muridId][idx]) sesiData[muridId][idx] = {};
-  sesiData[muridId][idx][key] = val;
-}
-
-function removeSesiRow(muridId, idx) {
-  sesiData[muridId].splice(idx, 1);
-  // Re-render the card
-  const m = muridSaya.find(x => x.id === muridId);
-  const bulan = document.getElementById('sesisBulan').value;
-  const card = document.getElementById('murid-card-' + muridId);
-  card.outerHTML = renderMuridSesiCard(m, bulan);
-  updateCount(muridId);
-}
-
-function toggleSesiMurid(muridId) {
-  const body = document.getElementById('sesi-body-' + muridId);
-  body.style.display = body.style.display === 'none' ? 'block' : 'none';
-}
-
-function updateCount(muridId) {
-  const el = document.getElementById('count-' + muridId);
-  if (el) el.textContent = (sesiData[muridId] || []).length + ' sesi';
-}
-
-async function saveSemua() {
-  const bulan = document.getElementById('sesisBulan').value;
-  if (!bulan) return toast('Pilih bulan laporan dulu', 'error');
-
-  // Collect all valid sesi
-  const payload = [];
-  for (const [muridId, rows] of Object.entries(sesiData)) {
-    rows.forEach(r => {
-      if (r.tanggal) {
-        payload.push({ murid_id: muridId, guru_id: currentGuru.id, tanggal: r.tanggal, catatan: r.catatan || '', bulan });
-      }
-    });
-  }
-
-  if (!payload.length) return toast('Belum ada tanggal sesi yang diisi', 'error');
-  showLoading(true);
+async function hapusSesi(id) {
+  if (!confirm('Hapus sesi ini?')) return;
   try {
-    await API.saveSesiGuru({ guru_id: currentGuru.id, bulan, sesi: payload });
-    showLoading(false);
-    toast(`${payload.length} sesi berhasil disimpan!`, 'success');
-    document.getElementById('savedBanner').style.display = 'flex';
-    setTimeout(() => document.getElementById('savedBanner').style.display = 'none', 4000);
-    // Refresh beranda
-    pageLoaded['beranda'] = false;
-    const newSesi = await API.getSesi({ guru_id: currentGuru.id, bulan: thisBulan() }) || [];
-    document.getElementById('chipSesiTotal').textContent = newSesi.length + ' sesi bulan ini';
-    const totalFee = newSesi.length * Number(currentGuru.fee_per_sesi || 0);
-    document.getElementById('feeEstimasi').textContent = fmt(totalFee);
-    document.getElementById('feeDetail').textContent   = `${newSesi.length} sesi × ${fmt(currentGuru.fee_per_sesi)}`;
-    renderBerandaSesi(newSesi);
-  } catch(e) {
-    showLoading(false);
-    toast(e.message, 'error');
-  }
+    await API.deleteSesi(id);
+    toast('Sesi dihapus', 'success');
+    loadHistori();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function lihatFoto(url) {
+  document.getElementById('fotoFull').src = url;
+  document.getElementById('modalFoto').classList.add('open');
+}
+function closeModalFoto() {
+  document.getElementById('modalFoto').classList.remove('open');
 }
 
 // ─── FEE REKAP ──────────────────────────────────────
@@ -523,37 +588,38 @@ async function loadFeeRekap() {
   const el    = document.getElementById('feeRekapContent');
   el.innerHTML = '<span class="spinner"></span>';
   try {
-    const sesi = await API.getSesi({ guru_id: currentGuru.id, bulan }) || [];
+    const sesi     = await API.getSesi({ guru_id: currentGuru.id, bulan }) || [];
     const totalFee = sesi.length * Number(currentGuru.fee_per_sesi || 0);
 
-    // Group by murid
     const byMurid = {};
     sesi.forEach(s => {
       const m = muridSaya.find(x => x.id === s.murid_id) || {};
-      if (!byMurid[s.murid_id]) byMurid[s.murid_id] = { nama: m.nama || s.murid_id, sesi: [] };
+      if (!byMurid[s.murid_id]) byMurid[s.murid_id] = { nama: m.nama||s.murid_id, sesi:[] };
       byMurid[s.murid_id].sesi.push(s);
     });
 
     el.innerHTML = `
-      <div class="fee-summary">
-        <div class="fee-label">Total Fee – ${bulan}</div>
-        <div class="fee-val" style="font-size:28px">${fmt(totalFee)}</div>
-        <div class="fee-detail">${sesi.length} sesi × ${fmt(currentGuru.fee_per_sesi)}</div>
+      <div class="fee-banner" style="margin-bottom:12px">
+        <div>
+          <div class="fee-label">Total Fee – ${bulan}</div>
+          <div class="fee-val" style="font-size:26px">${fmt(totalFee)}</div>
+          <div class="fee-detail">${sesi.length} sesi × ${fmt(currentGuru.fee_per_sesi)}</div>
+        </div>
+        <span style="font-size:36px">💰</span>
       </div>
       ${Object.entries(byMurid).map(([mid, {nama, sesi: ss}]) => `
-        <div style="border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px">
+        <div class="section-card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <b>${nama}</b>
-            <span class="badge badge-teal">${ss.length} sesi</span>
+            <span class="badge badge-teal">${ss.length} sesi · ${fmt(ss.length * Number(currentGuru.fee_per_sesi||0))}</span>
           </div>
           ${ss.sort((a,b)=>a.tanggal>b.tanggal?1:-1).map(s =>
-            `<div style="font-size:12px;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border)">📅 ${s.tanggal}${s.catatan ? ' – ' + s.catatan : ''}</div>`
+            `<div style="font-size:12px;color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border)">
+              📅 ${s.tanggal}${s.today_lesson ? ' — ' + s.today_lesson.substring(0,40) : ''}
+            </div>`
           ).join('')}
-          <div style="text-align:right;margin-top:8px;font-size:12px;color:var(--teal);font-weight:700">
-            ${ss.length} × ${fmt(currentGuru.fee_per_sesi)} = ${fmt(ss.length * Number(currentGuru.fee_per_sesi||0))}
-          </div>
         </div>
-      `).join('') || '<div class="empty-state">Belum ada sesi bulan ini</div>'}
+      `).join('') || '<div class="empty-state">Belum ada sesi</div>'}
     `;
   } catch(e) {
     el.innerHTML = '<div style="color:red">' + e.message + '</div>';
