@@ -298,7 +298,10 @@ tr:hover td{background:#FAFAF9}
             <div class="form-field"><label>Paket Sesi (Jumlah)</label><input type="number" id="fMuridPaket" placeholder="10" min="0"></div>
           </div>
           <div class="form-row">
+            <div class="form-field"><label>Fee per Sesi (Rp)</label><input type="number" id="fMuridFee" placeholder="Cth: 125000" min="0"></div>
             <div class="form-field"><label>Guru Tetap</label><select id="fMuridGuru"><option value="">Pilih Guru...</option></select></div>
+          </div>
+          <div class="form-row">
             <div class="form-field"><label>Status</label>
               <select id="fMuridAktif">
                 <option value="aktif">Aktif</option>
@@ -386,7 +389,7 @@ tr:hover td{background:#FAFAF9}
 
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Nama Guru</th><th>Total Sesi</th><th>Fee/Sesi</th><th>Total Fee</th><th>Detail Sesi</th></tr></thead>
+              <thead><tr><th>Nama Guru</th><th>Total Sesi</th><th>Fee (per Murid)</th><th>Total Fee</th><th>Detail Sesi</th></tr></thead>
               <tbody id="penggajianTbody"><tr><td colspan="5" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr></tbody>
             </table>
           </div>
@@ -438,7 +441,10 @@ tr:hover td{background:#FAFAF9}
       <div class="form-field"><label>Paket Sesi (Jumlah)</label><input type="number" id="editMuridPaket"></div>
     </div>
     <div class="form-row">
+      <div class="form-field"><label>Fee per Sesi (Rp)</label><input type="number" id="editMuridFee" placeholder="Cth: 125000"></div>
       <div class="form-field"><label>Guru Tetap</label><select id="editMuridGuru"></select></div>
+    </div>
+    <div class="form-row">
       <div class="form-field"><label>Status</label><select id="editMuridAktif"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
     </div>
     <div class="form-row">
@@ -589,11 +595,12 @@ async function loadDashboard() {
     document.getElementById('dashTotalGuru').textContent    = allGuru.filter(g => g.aktif !== 'nonaktif').length;
     document.getElementById('dashSesiBulanIni').textContent = sesiList.length;
 
-    // Total fee
+    // Total fee — gunakan fee_per_sesi per murid (fallback ke guru)
     let totalFee = 0;
-    allGuru.forEach(g => {
-      const cnt = sesiList.filter(s => s.guru_id === g.id).length;
-      totalFee += cnt * (Number(g.fee_per_sesi) || 0);
+    sesiList.forEach(s => {
+      const m = allMurid.find(x => x.id === s.murid_id) || {};
+      const g = allGuru.find(x => x.id === s.guru_id)   || {};
+      totalFee += Number(m.fee_per_sesi || g.fee_per_sesi || 0);
     });
     document.getElementById('dashTotalFee').textContent = 'Rp ' + Math.round(totalFee/1000) + 'rb';
 
@@ -616,8 +623,12 @@ async function loadDashboard() {
     // Guru rekap
     const guruEl = document.getElementById('dashGuruRekap');
     guruEl.innerHTML = allGuru.filter(g => g.aktif !== 'nonaktif').map(g => {
-      const cnt = sesiList.filter(s => s.guru_id === g.id).length;
-      return `<div class="summary-row"><span><b>${g.nama}</b></span><span>${cnt} sesi · ${fmt(cnt * Number(g.fee_per_sesi || 0))}</span></div>`;
+      const sesiG = sesiList.filter(s => s.guru_id === g.id);
+      const feeG  = sesiG.reduce((sum, s) => {
+        const m = allMurid.find(x => x.id === s.murid_id) || {};
+        return sum + Number(m.fee_per_sesi || g.fee_per_sesi || 0);
+      }, 0);
+      return `<div class="summary-row"><span><b>${g.nama}</b></span><span>${sesiG.length} sesi · ${fmt(feeG)}</span></div>`;
     }).join('') || '<div class="empty-state">Belum ada data guru</div>';
 
   } catch(e) {
@@ -777,13 +788,14 @@ function renderMuridTable() {
 
 async function saveMurid() {
   const data = {
-    nama:        document.getElementById('fMuridNama').value.trim(),
-    no_hp:       document.getElementById('fMuridHp').value.trim(),
-    program:     document.getElementById('fMuridProgram').value,
-    paket_sesi:  document.getElementById('fMuridPaket').value,
-    guru_id:     document.getElementById('fMuridGuru').value,
-    aktif:       document.getElementById('fMuridAktif').value,
-    nominal_spp: document.getElementById('fMuridSppNominal').value,
+    nama:         document.getElementById('fMuridNama').value.trim(),
+    no_hp:        document.getElementById('fMuridHp').value.trim(),
+    program:      document.getElementById('fMuridProgram').value,
+    paket_sesi:   document.getElementById('fMuridPaket').value,
+    fee_per_sesi: document.getElementById('fMuridFee').value,
+    guru_id:      document.getElementById('fMuridGuru').value,
+    aktif:        document.getElementById('fMuridAktif').value,
+    nominal_spp:  document.getElementById('fMuridSppNominal').value,
     tgl_bayar_spp: document.getElementById('fMuridSppTgl').value,
   };
   if (!data.nama) return toast('Nama murid wajib diisi', 'error');
@@ -791,7 +803,7 @@ async function saveMurid() {
     await API.addMurid(data);
     toast('Murid berhasil ditambahkan!', 'success');
     toggleForm('form-murid');
-    ['fMuridNama','fMuridHp','fMuridPaket','fMuridSppNominal','fMuridSppTgl'].forEach(id => document.getElementById(id).value = '');
+    ['fMuridNama','fMuridHp','fMuridPaket','fMuridFee','fMuridSppNominal','fMuridSppTgl'].forEach(id => document.getElementById(id).value = '');
     tabLoaded.dashboard = false;
     loadMurid();
   } catch(e) { toast(e.message, 'error'); }
@@ -805,6 +817,7 @@ function openEditMurid(id) {
   document.getElementById('editMuridHp').value          = m.no_hp || '';
   document.getElementById('editMuridProgram').value     = m.program || 'Vocal Regular';
   document.getElementById('editMuridPaket').value       = m.paket_sesi || '';
+  document.getElementById('editMuridFee').value         = m.fee_per_sesi || '';
   document.getElementById('editMuridGuru').value        = m.guru_id || '';
   document.getElementById('editMuridAktif').value       = m.aktif || 'aktif';
   document.getElementById('editMuridSppNominal').value  = m.nominal_spp || '';
@@ -821,13 +834,14 @@ async function updateMurid() {
   const id = document.getElementById('editMuridId').value;
   const data = {
     id,
-    nama:        document.getElementById('editMuridNama').value.trim(),
-    no_hp:       document.getElementById('editMuridHp').value.trim(),
-    program:     document.getElementById('editMuridProgram').value,
-    paket_sesi:  document.getElementById('editMuridPaket').value,
-    guru_id:     document.getElementById('editMuridGuru').value,
-    aktif:       document.getElementById('editMuridAktif').value,
-    nominal_spp: document.getElementById('editMuridSppNominal').value,
+    nama:         document.getElementById('editMuridNama').value.trim(),
+    no_hp:        document.getElementById('editMuridHp').value.trim(),
+    program:      document.getElementById('editMuridProgram').value,
+    paket_sesi:   document.getElementById('editMuridPaket').value,
+    fee_per_sesi: document.getElementById('editMuridFee').value,
+    guru_id:      document.getElementById('editMuridGuru').value,
+    aktif:        document.getElementById('editMuridAktif').value,
+    nominal_spp:  document.getElementById('editMuridSppNominal').value,
     tgl_bayar_spp: document.getElementById('editMuridSppTgl').value,
   };
   if (!data.nama) return toast('Nama murid wajib diisi', 'error');
@@ -879,8 +893,9 @@ async function loadLaporan() {
     const muridSet = new Set(sesi.map(s => s.murid_id));
     let totalFeeGuru = 0;
     sesi.forEach(s => {
-      const g = allGuru.find(x => x.id === s.guru_id);
-      if (g) totalFeeGuru += Number(g.fee_per_sesi || 0);
+      const m = allMurid.find(x => x.id === s.murid_id) || {};
+      const g = allGuru.find(x => x.id === s.guru_id)   || {};
+      totalFeeGuru += Number(m.fee_per_sesi || g.fee_per_sesi || 0);
     });
     document.getElementById('lStatSesi').textContent       = sesi.length;
     document.getElementById('lStatMurid').textContent      = muridSet.size;
@@ -948,25 +963,30 @@ async function loadPenggajian() {
     let grandTotal = 0;
     const rows = allGuru.filter(g => g.aktif !== 'nonaktif').map(g => {
       const sesiGuru = sesiList.filter(s => s.guru_id === g.id);
-      const total    = sesiGuru.length * (Number(g.fee_per_sesi) || 0);
-      grandTotal    += total;
+      // Kalkulasi total fee dari fee_per_sesi tiap murid (fallback ke guru fee)
+      let total = 0;
+      sesiGuru.forEach(s => {
+        const m = allMurid.find(x => x.id === s.murid_id) || {};
+        total += Number(m.fee_per_sesi || g.fee_per_sesi || 0);
+      });
+      grandTotal += total;
 
-      // Group by murid
+      // Group by murid + fee info
       const byMurid = {};
       sesiGuru.forEach(s => {
-        const m = allMurid.find(x => x.id === s.murid_id);
-        const nm = m ? m.nama : s.murid_id;
-        byMurid[nm] = (byMurid[nm] || []);
-        byMurid[nm].push(s.tanggal);
+        const m = allMurid.find(x => x.id === s.murid_id) || {};
+        const nm = m.nama || s.murid_id;
+        if (!byMurid[nm]) byMurid[nm] = { tgls: [], fee: Number(m.fee_per_sesi || g.fee_per_sesi || 0) };
+        byMurid[nm].tgls.push(s.tanggal);
       });
-      const detailHtml = Object.entries(byMurid)
-        .map(([nm, tgls]) => `<span class="sesi-chip">${nm}: ${tgls.length}x</span>`)
+      const feeDetail = Object.entries(byMurid)
+        .map(([nm, {tgls, fee}]) => `<span class="sesi-chip">${nm}: ${tgls.length}x (${fmt(fee)}/sesi)</span>`)
         .join('') || '<span style="color:var(--muted);font-size:12px">Belum ada sesi</span>';
 
       return `<tr>
         <td><b>${g.nama}</b></td>
         <td><b>${sesiGuru.length}</b> sesi</td>
-        <td>${fmt(g.fee_per_sesi)}</td>
+        <td style="font-size:12px">${feeDetail}</td>
         <td class="gaji-guru-amount" style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--purple2)">${fmt(total)}</td>
         <td>
           <button class="btn btn-sm btn-purple" style="background:#F5F3FF;color:var(--purple2);border:1px solid #DDD6FE" onclick="showDetailSesi('${g.id}','${g.nama}','${bulan}')">🔍 Detail</button>

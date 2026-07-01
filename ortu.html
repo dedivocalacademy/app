@@ -332,7 +332,6 @@ function renderRecentKBM() {
 }
 
 function kbmCardHtml(s) {
-  const bulanLabel = s.bulan || s.tanggal?.substring(0,7) || '';
   return `
   <div class="kbm-card">
     <div class="kbm-head">
@@ -342,12 +341,9 @@ function kbmCardHtml(s) {
       </div>
       <span class="badge badge-teal">✓ Hadir</span>
     </div>
-    ${(s.today_lesson || s.foto_url) ? `
+    ${s.today_lesson ? `
     <div class="kbm-body">
-      ${s.today_lesson ? `<div class="kbm-lesson">📖 <b>Materi:</b> ${s.today_lesson}</div>` : ''}
-      ${s.foto_url
-        ? `<img src="${s.foto_url}" class="kbm-foto" onclick="lihatFoto('${s.foto_url}')" alt="Foto KBM">`
-        : ''}
+      <div class="kbm-lesson">📖 <b>Materi:</b> ${s.today_lesson}</div>
     </div>` : ''}
   </div>`;
 }

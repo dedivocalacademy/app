@@ -365,12 +365,12 @@ async function initApp() {
     muridSaya = (allMurid || []).filter(m => m.guru_id === currentGuru.id);
 
     const totalSesi = (sesi || []).length;
-    const totalFee  = totalSesi * Number(currentGuru.fee_per_sesi || 0);
+    const totalFee  = hitungTotalFee(sesi || []);
     document.getElementById('chipMurid').textContent = muridSaya.length + ' murid';
     document.getElementById('chipSesi').textContent  = totalSesi + ' sesi bln ini';
     document.getElementById('chipFee').textContent   = 'Fee: Rp ' + Math.round(totalFee/1000) + 'rb';
     document.getElementById('feeEstimasi').textContent = fmt(totalFee);
-    document.getElementById('feeDetail').textContent   = totalSesi + ' sesi × ' + fmt(currentGuru.fee_per_sesi);
+    document.getElementById('feeDetail').textContent   = totalSesi + ' sesi (fee per murid)';
 
     renderBerandaMurid();
     renderBerandaSesi(sesi || []);
@@ -509,11 +509,11 @@ async function simpanKBM() {
     const bln  = thisBulan();
     const sesi = await API.getSesi({ guru_id: currentGuru.id, bulan: bln }) || [];
     const totalSesi = sesi.length;
-    const totalFee  = totalSesi * Number(currentGuru.fee_per_sesi || 0);
+    const totalFee  = hitungTotalFee(sesi);
     document.getElementById('chipSesi').textContent    = totalSesi + ' sesi bln ini';
     document.getElementById('chipFee').textContent     = 'Fee: Rp ' + Math.round(totalFee/1000) + 'rb';
     document.getElementById('feeEstimasi').textContent = fmt(totalFee);
-    document.getElementById('feeDetail').textContent   = totalSesi + ' sesi × ' + fmt(currentGuru.fee_per_sesi);
+    document.getElementById('feeDetail').textContent   = totalSesi + ' sesi (fee per murid)';
     renderBerandaSesi(sesi);
 
     // Refresh sisa sesi murid
@@ -587,6 +587,14 @@ function closeModalFoto() {
   document.getElementById('modalFoto').classList.remove('open');
 }
 
+// ─── HELPER: hitung total fee dari list sesi (per murid) ────
+function hitungTotalFee(sesiList) {
+  return sesiList.reduce((sum, s) => {
+    const m = muridSaya.find(x => x.id === s.murid_id) || {};
+    return sum + Number(m.fee_per_sesi || currentGuru.fee_per_sesi || 0);
+  }, 0);
+}
+
 // ─── FEE REKAP ──────────────────────────────────────
 async function loadFeeRekap() {
   const bulan = document.getElementById('feeBulan').value || thisBulan();
@@ -594,12 +602,12 @@ async function loadFeeRekap() {
   el.innerHTML = '<span class="spinner"></span>';
   try {
     const sesi     = await API.getSesi({ guru_id: currentGuru.id, bulan }) || [];
-    const totalFee = sesi.length * Number(currentGuru.fee_per_sesi || 0);
+    const totalFee = hitungTotalFee(sesi);
 
     const byMurid = {};
     sesi.forEach(s => {
       const m = muridSaya.find(x => x.id === s.murid_id) || {};
-      if (!byMurid[s.murid_id]) byMurid[s.murid_id] = { nama: m.nama||s.murid_id, sesi:[] };
+      if (!byMurid[s.murid_id]) byMurid[s.murid_id] = { nama: m.nama||s.murid_id, fee: Number(m.fee_per_sesi || currentGuru.fee_per_sesi || 0), sesi:[] };
       byMurid[s.murid_id].sesi.push(s);
     });
 
@@ -608,15 +616,15 @@ async function loadFeeRekap() {
         <div>
           <div class="fee-label">Total Fee – ${bulan}</div>
           <div class="fee-val" style="font-size:26px">${fmt(totalFee)}</div>
-          <div class="fee-detail">${sesi.length} sesi × ${fmt(currentGuru.fee_per_sesi)}</div>
+          <div class="fee-detail">${sesi.length} sesi (fee per murid)</div>
         </div>
         <span style="font-size:36px">💰</span>
       </div>
-      ${Object.entries(byMurid).map(([mid, {nama, sesi: ss}]) => `
+      ${Object.entries(byMurid).map(([mid, {nama, fee, sesi: ss}]) => `
         <div class="section-card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <b>${nama}</b>
-            <span class="badge badge-teal">${ss.length} sesi · ${fmt(ss.length * Number(currentGuru.fee_per_sesi||0))}</span>
+            <span class="badge badge-teal">${ss.length} sesi · ${fmt(ss.length * fee)} <span style="font-size:10px;opacity:.7">(${fmt(fee)}/sesi)</span></span>
           </div>
           ${ss.sort((a,b)=>a.tanggal>b.tanggal?1:-1).map(s =>
             `<div style="font-size:12px;color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border)">
