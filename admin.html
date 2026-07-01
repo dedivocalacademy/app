@@ -241,7 +241,7 @@ tr:hover td{background:#FAFAF9}
             <div class="form-field"><label>Kode Login Guru</label><input type="text" id="fGuruKode" placeholder="Cth: GURU01" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
           </div>
           <div class="form-row">
-            <div class="form-field"><label>Fee per Pertemuan (Rp)</label><input type="number" id="fGuruFee" placeholder="150000" min="0"></div>
+            <div class="form-field"><label>Default Fee (opsional, Rp)</label><input type="number" id="fGuruFee" placeholder="Fallback jika murid belum ada fee" min="0"></div>
             <div class="form-field"><label>Status</label>
               <select id="fGuruAktif">
                 <option value="aktif">Aktif</option>
@@ -257,8 +257,8 @@ tr:hover td{background:#FAFAF9}
 
         <div class="table-wrap" style="margin-top:14px">
           <table>
-            <thead><tr><th>Nama Guru</th><th>Kode Login</th><th>Fee/Pertemuan</th><th>Jumlah Murid</th><th>Status</th><th>Aksi</th></tr></thead>
-            <tbody id="guruTbody"><tr><td colspan="6" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr></tbody>
+            <thead><tr><th>Nama Guru</th><th>Kode Login</th><th>Jumlah Murid</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody id="guruTbody"><tr><td colspan="5" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -411,7 +411,7 @@ tr:hover td{background:#FAFAF9}
       <div class="form-field"><label>Kode Login</label><input type="text" id="editGuruKode" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
     </div>
     <div class="form-row">
-      <div class="form-field"><label>Fee per Pertemuan (Rp)</label><input type="number" id="editGuruFee"></div>
+      <div class="form-field"><label>Default Fee (opsional, Rp)</label><input type="number" id="editGuruFee" placeholder="Fallback jika murid belum ada fee"></div>
       <div class="form-field"><label>Status</label><select id="editGuruAktif"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
     </div>
     <div class="form-actions">
@@ -649,7 +649,7 @@ async function loadGuru() {
 
 function renderGuruTable() {
   const tb = document.getElementById('guruTbody');
-  if (!allGuru.length) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">Belum ada data guru</td></tr>'; return; }
+  if (!allGuru.length) { tb.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada data guru</td></tr>'; return; }
   tb.innerHTML = allGuru.map(g => {
     const jumlahMurid = allMurid.filter(m => m.guru_id === g.id).length;
     const aktifBadge  = g.aktif === 'nonaktif'
@@ -658,7 +658,6 @@ function renderGuruTable() {
     return `<tr>
       <td><b>${g.nama}</b></td>
       <td><span class="kode-display">${g.kode_login || '–'}</span></td>
-      <td>${fmt(g.fee_per_sesi)}</td>
       <td>${jumlahMurid} murid</td>
       <td>${aktifBadge}</td>
       <td>
