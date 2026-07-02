@@ -284,16 +284,13 @@ tr:hover td{background:#FAFAF9}
             <div class="form-field"><label>Nama Murid</label><input type="text" id="fMuridNama" placeholder="Nama lengkap..."></div>
             <div class="form-field"><label>No. HP</label><input type="tel" id="fMuridHp" placeholder="08xxx..."></div>
           </div>
+          <datalist id="programOptions">
+            <option value="Vocal Online"><option value="Vocal Regular"><option value="Vocal Home">
+            <option value="Vocal Group Reguler"><option value="Vocal Group Home"><option value="Choir">
+          </datalist>
           <div class="form-row">
             <div class="form-field"><label>Program</label>
-              <select id="fMuridProgram">
-                <option value="Vocal Online">Vocal Online</option>
-                <option value="Vocal Regular">Vocal Regular</option>
-                <option value="Vocal Home">Vocal Home</option>
-                <option value="Vocal Group Reguler">Vocal Group Reguler</option>
-                <option value="Vocal Group Home">Vocal Group Home</option>
-                <option value="Choir">Choir</option>
-              </select>
+              <input type="text" id="fMuridProgram" list="programOptions" placeholder="Ketik atau pilih program...">
             </div>
             <div class="form-field"><label>Paket Sesi (Jumlah)</label><input type="number" id="fMuridPaket" placeholder="10" min="0"></div>
           </div>
@@ -440,12 +437,19 @@ tr:hover td{background:#FAFAF9}
     </div>
     <div class="form-row">
       <div class="form-field"><label>Program</label>
-        <select id="editMuridProgram">
-          <option>Vocal Online</option><option>Vocal Regular</option><option>Vocal Home</option>
-          <option>Vocal Group Reguler</option><option>Vocal Group Home</option><option>Choir</option>
-        </select>
+        <input type="text" id="editMuridProgram" list="programOptions" placeholder="Ketik atau pilih program...">
       </div>
-      <div class="form-field"><label>Paket Sesi (Jumlah)</label><input type="number" id="editMuridPaket"></div>
+      <div class="form-field">
+        <label>Paket Sesi (Total)</label>
+        <input type="number" id="editMuridPaket">
+        <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
+          <span style="font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap">➕ Tambah:</span>
+          <input type="number" id="tambahSesiInput" placeholder="cth: 8" min="1"
+            style="width:80px;padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;outline:none">
+          <button onclick="tambahSesi()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer">Tambah</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px" id="editMuridSisaInfo"></div>
+      </div>
     </div>
     <div class="form-row">
       <div class="form-field"><label>Fee per Sesi (Rp)</label><input type="number" id="editMuridFee" placeholder="Cth: 125000"></div>
@@ -821,7 +825,7 @@ function openEditMurid(id) {
   document.getElementById('editMuridId').value          = m.id;
   document.getElementById('editMuridNama').value        = m.nama;
   document.getElementById('editMuridHp').value          = m.no_hp || '';
-  document.getElementById('editMuridProgram').value     = m.program || 'Vocal Regular';
+  document.getElementById('editMuridProgram').value     = m.program || '';
   document.getElementById('editMuridPaket').value       = m.paket_sesi || '';
   document.getElementById('editMuridFee').value         = m.fee_per_sesi || '';
   document.getElementById('editMuridGuru').value        = m.guru_id || '';
@@ -829,12 +833,31 @@ function openEditMurid(id) {
   document.getElementById('editMuridSppNominal').value  = m.nominal_spp || '';
   document.getElementById('editMuridSppTgl').value      = m.tgl_bayar_spp || '';
   document.getElementById('editMuridLinkId').value      = m.link_id || '';
+  document.getElementById('tambahSesiInput').value      = '';
+  const paket = Number(m.paket_sesi || 0);
+  const sisa  = Number(m.sisa_sesi  ?? paket);
+  document.getElementById('editMuridSisaInfo').textContent =
+    paket ? `Saat ini: ${paket} paket · ${sisa} sisa · ${Number(m.sesi_terpakai||0)} terpakai` : '';
   openModal('modalEditMurid');
 }
+
+function tambahSesi() {
+  const tambah  = Number(document.getElementById('tambahSesiInput').value || 0);
+  if (!tambah || tambah < 1) return toast('Masukkan jumlah sesi yang ditambah', 'error');
+  const current = Number(document.getElementById('editMuridPaket').value || 0);
+  const newTotal = current + tambah;
+  document.getElementById('editMuridPaket').value = newTotal;
+  document.getElementById('tambahSesiInput').value = '';
+  document.getElementById('editMuridSisaInfo').textContent = `Setelah simpan: ${newTotal} paket total`;
+  toast(`Paket +${tambah} → total ${newTotal} sesi`, 'success');
+}
 function copyLink() {
+  const id     = document.getElementById('editMuridId').value;
+  const m      = allMurid.find(x => x.id === id) || {};
   const linkId = document.getElementById('editMuridLinkId').value;
-  const url    = location.origin + location.pathname.replace('admin.html','ortu.html') + '?id=' + linkId;
-  navigator.clipboard.writeText(url).then(() => toast('Link disalin!', 'success'));
+  const nama   = encodeURIComponent(m.nama || '');
+  const url    = location.origin + location.pathname.replace('admin.html','ortu.html') + '?id=' + linkId + (nama ? '&n=' + nama : '');
+  navigator.clipboard.writeText(url).then(() => toast('Link ' + (m.nama ? '(' + m.nama + ')' : '') + ' disalin!', 'success'));
 }
 async function updateMurid() {
   const id = document.getElementById('editMuridId').value;

@@ -235,6 +235,15 @@ function closeFoto() {
 async function init() {
   const params  = new URLSearchParams(location.search);
   const link_id = params.get('id');
+  const namaUrl = params.get('n');  // nama dari URL (opsional, untuk tampilan awal)
+
+  // Tampilkan nama dari URL saat loading (sebelum data masuk)
+  if (namaUrl) {
+    const decoded = decodeURIComponent(namaUrl);
+    document.querySelector('#loadingScreen p').textContent = 'Memuat data ' + decoded + '...';
+    document.title = decoded + ' – DiVA';
+  }
+
   if (!link_id) {
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('errorScreen').classList.add('show');
