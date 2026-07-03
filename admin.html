@@ -191,6 +191,7 @@ tr:hover td{background:#FAFAF9}
     <button class="tab-btn" onclick="showTab('murid',this)">👨‍🎓 Murid</button>
     <button class="tab-btn" onclick="showTab('laporan',this)">📋 Laporan Sesi</button>
     <button class="tab-btn" onclick="showTab('penggajian',this)">💰 Penggajian</button>
+    <button class="tab-btn" onclick="showTab('settings',this)">⚙️ Pengaturan</button>
   </div>
 
   <div class="app-content">
@@ -401,6 +402,44 @@ tr:hover td{background:#FAFAF9}
       </div>
     </div>
 
+    <!-- PENGATURAN -->
+    <div class="tab-page" id="tab-settings">
+      <div class="section-card" style="max-width:480px">
+        <div class="card-head"><h3>⚙️ Akun Admin</h3></div>
+        <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:18px;font-size:13px;color:var(--muted)">
+          Username dan password saat ini disimpan di browser ini. Jika berganti browser/device, gunakan password lama atau reset ke default.
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Username saat ini</div>
+          <div id="settingsCurrUser" style="font-family:monospace;font-size:15px;font-weight:800;color:var(--purple);background:#F5F3FF;border-radius:10px;padding:10px 14px">–</div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin-bottom:18px">
+        <div style="font-weight:800;font-size:14px;margin-bottom:14px">Ubah Kredensial</div>
+
+        <div class="form-field" style="margin-bottom:12px">
+          <label>Username Baru</label>
+          <input type="text" id="newAdminUser" placeholder="Username baru...">
+        </div>
+        <div class="form-field" style="margin-bottom:12px">
+          <label>Password Baru</label>
+          <div class="pw-wrap">
+            <input type="password" id="newAdminPass" placeholder="Password baru...">
+            <button class="pw-eye" onclick="togglePwNew()">👁</button>
+          </div>
+        </div>
+        <div class="form-field" style="margin-bottom:18px">
+          <label>Konfirmasi Password</label>
+          <input type="password" id="newAdminPassConfirm" placeholder="Ulangi password baru...">
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="simpanAkunAdmin()">💾 Simpan</button>
+          <button class="btn btn-danger" onclick="resetAkunAdmin()">🔄 Reset ke Default</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -496,20 +535,42 @@ tr:hover td{background:#FAFAF9}
 
 <script>
 // ─── AUTH ───────────────────────────────────────────
-const ADMIN_EMAIL = '123456';
-const ADMIN_PASS  = '123456';
+// Fallback jika Sheets belum ada sheet settings (misal belum redeploy Code.gs)
+const ADMIN_FALLBACK_USER = '123456';
+const ADMIN_FALLBACK_PASS = '123456';
 
-function doLogin() {
-  const email = document.getElementById('emailInput').value.trim();
-  const pw    = document.getElementById('pwInput').value;
-  const err   = document.getElementById('loginErr');
-  if (email === ADMIN_EMAIL && pw === ADMIN_PASS) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('appShell').style.display = 'flex';
-    err.style.display = 'none';
-    initApp();
-  } else {
-    err.style.display = 'block';
+async function doLogin() {
+  const emailInput = document.getElementById('emailInput');
+  const pwInput    = document.getElementById('pwInput');
+  const errEl      = document.getElementById('loginErr');
+  const btnLogin   = document.querySelector('.btn-login');
+  const email = emailInput.value.trim();
+  const pw    = pwInput.value;
+  errEl.style.display = 'none';
+  btnLogin.textContent = 'Memverifikasi...';
+  btnLogin.disabled = true;
+  try {
+    let adminUser = ADMIN_FALLBACK_USER;
+    let adminPass = ADMIN_FALLBACK_PASS;
+    try {
+      const s = await API.getSettings();
+      if (s && s.admin_user) { adminUser = s.admin_user; adminPass = s.admin_pass || ''; }
+    } catch(_) { /* fallback ke default jika Sheets belum punya settings */ }
+
+    if (email === adminUser && pw === adminPass) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appShell').style.display = 'flex';
+      initApp();
+    } else {
+      errEl.style.display = 'block';
+      errEl.textContent = 'Username atau password salah.';
+    }
+  } catch(e) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Gagal terhubung. Coba lagi.';
+  } finally {
+    btnLogin.textContent = 'Masuk →';
+    btnLogin.disabled = false;
   }
 }
 function doLogout() {
@@ -520,6 +581,10 @@ function doLogout() {
 }
 function togglePw() {
   const inp = document.getElementById('pwInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function togglePwNew() {
+  const inp = document.getElementById('newAdminPass');
   inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 
@@ -538,6 +603,7 @@ function loadTab(id) {
   if (id === 'murid')     loadMurid();
   if (id === 'laporan')   initLaporan();
   if (id === 'penggajian') initPenggajian();
+  if (id === 'settings')  loadSettings();
 }
 
 // ─── TOAST ──────────────────────────────────────────
@@ -1093,6 +1159,49 @@ async function showDetailSesi(guruId, guruNama, bulan) {
       </div>
     `).join('');
   } catch(e) { el.innerHTML = '<div style="color:red">' + e.message + '</div>'; }
+}
+
+// ─── PENGATURAN ADMIN ───────────────────────────────
+async function loadSettings() {
+  const el = document.getElementById('settingsCurrUser');
+  el.textContent = '⏳ Memuat...';
+  document.getElementById('newAdminUser').value = '';
+  document.getElementById('newAdminPass').value = '';
+  document.getElementById('newAdminPassConfirm').value = '';
+  try {
+    const s = await API.getSettings();
+    el.textContent = s.admin_user || ADMIN_FALLBACK_USER;
+  } catch(e) {
+    el.textContent = ADMIN_FALLBACK_USER;
+    toast('Gagal load settings: ' + e.message, 'error');
+  }
+}
+
+async function simpanAkunAdmin() {
+  const newUser    = document.getElementById('newAdminUser').value.trim();
+  const newPass    = document.getElementById('newAdminPass').value;
+  const newConfirm = document.getElementById('newAdminPassConfirm').value;
+  if (!newUser) return toast('Username baru wajib diisi', 'error');
+  if (!newPass) return toast('Password baru wajib diisi', 'error');
+  if (newPass !== newConfirm) return toast('Konfirmasi password tidak cocok', 'error');
+  if (newPass.length < 6) return toast('Password minimal 6 karakter', 'error');
+  try {
+    await API.updateSettings({ admin_user: newUser, admin_pass: newPass });
+    document.getElementById('settingsCurrUser').textContent = newUser;
+    document.getElementById('newAdminUser').value = '';
+    document.getElementById('newAdminPass').value = '';
+    document.getElementById('newAdminPassConfirm').value = '';
+    toast('Akun admin berhasil diperbarui! ✅', 'success');
+  } catch(e) { toast('Gagal menyimpan: ' + e.message, 'error'); }
+}
+
+async function resetAkunAdmin() {
+  if (!confirm('Reset username & password ke default (123456 / 123456)?')) return;
+  try {
+    await API.updateSettings({ admin_user: '123456', admin_pass: '123456' });
+    document.getElementById('settingsCurrUser').textContent = '123456';
+    toast('Akun direset ke default', 'success');
+  } catch(e) { toast('Gagal reset: ' + e.message, 'error'); }
 }
 </script>
 </body>

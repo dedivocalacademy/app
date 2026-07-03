@@ -47,6 +47,10 @@ const API = {
   addKBM:     (d)       => API.post({ action: 'addKBM', ...d }),
   deleteSesi: (id)      => API.post({ action: 'deleteSesi', id }),
 
+  // ── SETTINGS ─────────────────────────────────────────────
+  getSettings:    ()  => API.post({ action: 'getSettings' }),
+  updateSettings: (s) => API.post({ action: 'updateSettings', settings: s }),
+
   // ── UPLOAD FOTO KBM ──────────────────────────────────────
   // uploadFotoKBM(file: File) → { url, fileId }
   uploadFotoKBM: (file) =>
