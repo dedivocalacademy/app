@@ -116,6 +116,16 @@ main{max-width:680px;margin:0 auto;padding:16px 14px 16px}
 .upload-preview{width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:10px;display:none}
 .upload-progress{display:none;margin-top:8px;font-size:12px;font-weight:700;color:var(--teal)}
 
+/* LINK INPUTS */
+.link-row{display:flex;gap:6px;margin-bottom:8px;align-items:center}
+.link-row input{padding:9px 11px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;color:var(--dark);outline:none;background:var(--white);transition:border-color .2s}
+.link-row input:focus{border-color:var(--teal)}
+.link-row .inp-title{flex:1}
+.link-row .inp-url{flex:2}
+.link-row .btn-del-link{background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:8px;padding:7px 10px;cursor:pointer;font-size:14px;flex-shrink:0;line-height:1}
+.link-chip{display:flex;align-items:center;gap:8px;background:#F0FDFA;border:1.5px solid #CCFBF1;border-radius:9px;padding:8px 12px;text-decoration:none;color:var(--teal);font-size:13px;font-weight:700;margin-bottom:6px}
+.link-chip span{font-size:11px;color:var(--muted);margin-left:auto}
+
 /* BADGES */
 .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
 .badge-green{background:#ECFDF5;color:var(--green)}
@@ -240,12 +250,12 @@ main{max-width:680px;margin:0 auto;padding:16px 14px 16px}
   </nav>
 </div>
 
-<!-- MODAL INPUT KBM -->
+<!-- MODAL INPUT / EDIT KBM -->
 <div class="modal-overlay" id="modalKBM">
   <div class="modal-box">
     <div class="modal-drag"></div>
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-title">📋 Input KBM</div>
+    <div class="modal-title" id="kbmModalTitle">📋 Input KBM</div>
     <div class="modal-sub" id="kbmMuridLabel">–</div>
 
     <div class="form-field">
@@ -260,16 +270,30 @@ main{max-width:680px;margin:0 auto;padding:16px 14px 16px}
 
     <div class="form-field">
       <label>Foto KBM (opsional)</label>
+      <!-- Existing foto saat edit mode -->
+      <div id="existingFotoWrap" style="display:none;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">Foto saat ini:</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <img id="existingFotoThumb" style="width:64px;height:64px;object-fit:cover;border-radius:9px">
+          <button onclick="hapusFotoExisting()" style="background:#FEF2F2;border:1px solid #FECACA;color:var(--red);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">🗑️ Hapus Foto</button>
+        </div>
+      </div>
       <div class="upload-area" id="uploadArea">
         <input type="file" id="kbmFoto" accept="image/*" onchange="previewFoto(this)">
         <div id="uploadPlaceholder">
           <div style="font-size:32px;margin-bottom:6px">📷</div>
-          <div style="font-size:13px;font-weight:700;color:var(--muted)">Tap untuk pilih foto</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px">JPG, PNG maks 5MB</div>
+          <div style="font-size:13px;font-weight:700;color:var(--muted)" id="uploadPlaceholderText">Tap untuk pilih foto</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">JPG, PNG maks 10MB</div>
         </div>
         <img id="fotoPreview" class="upload-preview">
       </div>
       <div class="upload-progress" id="uploadProgress">⏫ Mengupload foto ke Drive...</div>
+    </div>
+
+    <div class="form-field">
+      <label>🔗 Tugas / Link Referensi (opsional)</label>
+      <div id="linkInputsContainer"></div>
+      <button onclick="tambahLinkInput()" style="background:var(--bg);border:1.5px dashed var(--border);border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;width:100%;margin-top:2px">➕ Tambah Link</button>
     </div>
 
     <button class="btn btn-primary btn-full" id="btnSimpanKBM" onclick="simpanKBM()">💾 Simpan KBM</button>
@@ -287,10 +311,12 @@ main{max-width:680px;margin:0 auto;padding:16px 14px 16px}
 <div id="toast"></div>
 
 <script>
-let currentGuru  = null;
-let muridSaya    = [];
-let kbmMuridId   = null;
-let pageLoaded   = {};
+let currentGuru    = null;
+let muridSaya      = [];
+let kbmMuridId     = null;
+let editingKBMId   = null;
+let existingFotoUrl = '';
+let pageLoaded     = {};
 
 function showLoading(v, txt='Memuat data...') {
   document.getElementById('loadingOverlay').style.display = v ? 'flex' : 'none';
@@ -423,37 +449,120 @@ function renderBerandaSesi(sesiList) {
         </div>
         <div style="display:flex;align-items:center;gap:6px">
           ${s.foto_url ? `<img src="${s.foto_url}" style="width:36px;height:36px;object-fit:cover;border-radius:7px;cursor:pointer" onclick="lihatFoto('${s.foto_url}')">` : ''}
+          <button onclick='openEditKBM(${JSON.stringify(s)})' style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;color:var(--dark)">✏️ Edit</button>
         </div>
       </div>
       ${s.today_lesson ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;padding-left:2px">📖 ${s.today_lesson}</div>` : ''}
+      ${renderLinkChips(s.links)}
     </div>`;
   }).join('');
 }
 
 // ─── INPUT KBM MODAL ────────────────────────────────
 function openKBM(muridId, muridNama) {
-  kbmMuridId = muridId;
+  editingKBMId    = null;
+  existingFotoUrl = '';
+  kbmMuridId      = muridId;
+  document.getElementById('kbmModalTitle').textContent = '📋 Input KBM';
   document.getElementById('kbmMuridLabel').textContent = muridNama;
-  // Default tanggal = hari ini
   document.getElementById('kbmTanggal').value = new Date().toISOString().split('T')[0];
   document.getElementById('kbmLesson').value  = '';
   document.getElementById('kbmFoto').value    = '';
-  document.getElementById('fotoPreview').style.display = 'none';
+  document.getElementById('fotoPreview').style.display  = 'none';
+  document.getElementById('uploadPlaceholder').style.display = 'block';
+  document.getElementById('uploadPlaceholderText').textContent = 'Tap untuk pilih foto';
+  document.getElementById('uploadProgress').style.display = 'none';
+  document.getElementById('existingFotoWrap').style.display = 'none';
+  document.getElementById('btnSimpanKBM').disabled = false;
+  clearLinkInputs();
+  document.getElementById('modalKBM').classList.add('open');
+}
+
+function openEditKBM(s) {
+  editingKBMId    = s.id;
+  existingFotoUrl = s.foto_url || '';
+  kbmMuridId      = s.murid_id;
+  const m = muridSaya.find(x => x.id === s.murid_id) || {};
+  document.getElementById('kbmModalTitle').textContent = '✏️ Edit KBM';
+  document.getElementById('kbmMuridLabel').textContent = (m.nama||'–') + ' · ' + s.tanggal;
+  document.getElementById('kbmTanggal').value = s.tanggal || '';
+  document.getElementById('kbmLesson').value  = s.today_lesson || '';
+
+  if (existingFotoUrl) {
+    document.getElementById('existingFotoThumb').src = existingFotoUrl;
+    document.getElementById('existingFotoWrap').style.display = 'block';
+    document.getElementById('uploadPlaceholderText').textContent = 'Tap untuk ganti foto';
+  } else {
+    document.getElementById('existingFotoWrap').style.display = 'none';
+    document.getElementById('uploadPlaceholderText').textContent = 'Tap untuk pilih foto';
+  }
+  document.getElementById('kbmFoto').value   = '';
+  document.getElementById('fotoPreview').style.display  = 'none';
   document.getElementById('uploadPlaceholder').style.display = 'block';
   document.getElementById('uploadProgress').style.display = 'none';
   document.getElementById('btnSimpanKBM').disabled = false;
+
+  clearLinkInputs();
+  try {
+    const links = typeof s.links === 'string' ? JSON.parse(s.links||'[]') : (s.links||[]);
+    links.forEach(l => tambahLinkInput(l.title||'', l.url||''));
+  } catch(e) {}
+
   document.getElementById('modalKBM').classList.add('open');
 }
+
+function hapusFotoExisting() {
+  existingFotoUrl = '';
+  document.getElementById('existingFotoWrap').style.display = 'none';
+  document.getElementById('uploadPlaceholderText').textContent = 'Tap untuk pilih foto baru';
+}
+
 function closeModal() {
   document.getElementById('modalKBM').classList.remove('open');
-  kbmMuridId = null;
+  kbmMuridId      = null;
+  editingKBMId    = null;
+  existingFotoUrl = '';
+}
+
+// ─── LINK INPUTS ────────────────────────────────────
+function tambahLinkInput(title='', url='') {
+  const container = document.getElementById('linkInputsContainer');
+  const row = document.createElement('div');
+  row.className = 'link-row';
+  row.innerHTML =
+    `<input type="text" class="inp-title" placeholder="Judul (cth: Lagu Tugas)" value="${title.replace(/"/g,'&quot;')}">` +
+    `<input type="url"  class="inp-url"   placeholder="https://..."             value="${url.replace(/"/g,'&quot;')}">` +
+    `<button class="btn-del-link" onclick="this.parentElement.remove()">✕</button>`;
+  container.appendChild(row);
+}
+function getLinkInputs() {
+  const links = [];
+  document.querySelectorAll('#linkInputsContainer .link-row').forEach(row => {
+    const title = row.querySelector('.inp-title').value.trim();
+    const url   = row.querySelector('.inp-url').value.trim();
+    if (title || url) links.push({ title, url });
+  });
+  return links;
+}
+function clearLinkInputs() {
+  document.getElementById('linkInputsContainer').innerHTML = '';
+}
+function renderLinkChips(linksData) {
+  let links = [];
+  try { links = typeof linksData === 'string' ? JSON.parse(linksData||'[]') : (linksData||[]); } catch(e) {}
+  if (!links.length) return '';
+  return '<div style="margin-top:6px">' + links.map(l => {
+    let host = '';
+    try { host = new URL(l.url).hostname; } catch(e) {}
+    return `<a href="${l.url}" target="_blank" rel="noopener" class="link-chip">🔗 ${l.title||l.url}${host?`<span>${host}</span>`:''}</a>`;
+  }).join('') + '</div>';
 }
 
 function previewFoto(input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 5 * 1024 * 1024) {
-    toast('Foto max 5MB', 'error');
+  if (file.size > 10 * 1024 * 1024) {
+    toast('Foto max 10MB', 'error');
     input.value = '';
     return;
   }
@@ -468,16 +577,20 @@ function previewFoto(input) {
 }
 
 async function simpanKBM() {
-  if (!kbmMuridId) return;
-  const tanggal = document.getElementById('kbmTanggal').value;
-  const lesson  = document.getElementById('kbmLesson').value.trim();
-  const fotoEl  = document.getElementById('kbmFoto');
+  if (!editingKBMId && !kbmMuridId) return;
+  const tanggal   = document.getElementById('kbmTanggal').value;
+  const lesson    = document.getElementById('kbmLesson').value.trim();
+  const fotoEl    = document.getElementById('kbmFoto');
+  const links     = getLinkInputs();
+  const linksJson = links.length ? JSON.stringify(links) : '';
+
   if (!tanggal) return toast('Tanggal wajib diisi', 'error');
 
   const btn = document.getElementById('btnSimpanKBM');
   btn.disabled = true;
 
-  let fotoUrl = '';
+  // Upload foto baru jika ada
+  let fotoUrl = editingKBMId ? existingFotoUrl : '';
   const file = fotoEl.files[0];
   if (file) {
     document.getElementById('uploadProgress').style.display = 'block';
@@ -494,15 +607,14 @@ async function simpanKBM() {
   }
 
   try {
-    await API.addKBM({
-      guru_id:      currentGuru.id,
-      murid_id:     kbmMuridId,
-      tanggal,
-      today_lesson: lesson,
-      foto_url:     fotoUrl,
-    });
+    if (editingKBMId) {
+      await API.updateKBM({ id: editingKBMId, tanggal, today_lesson: lesson, foto_url: fotoUrl, links: linksJson });
+      toast('KBM berhasil diupdate! ✅', 'success');
+    } else {
+      await API.addKBM({ guru_id: currentGuru.id, murid_id: kbmMuridId, tanggal, today_lesson: lesson, foto_url: fotoUrl, links: linksJson });
+      toast('KBM berhasil disimpan! ✅', 'success');
+    }
 
-    toast('KBM berhasil disimpan! ✅', 'success');
     closeModal();
 
     // Refresh beranda
@@ -516,10 +628,11 @@ async function simpanKBM() {
     document.getElementById('feeDetail').textContent   = totalSesi + ' sesi (fee per murid)';
     renderBerandaSesi(sesi);
 
-    // Refresh sisa sesi murid
     const allMurid = await API.getMurid() || [];
     muridSaya = allMurid.filter(m => m.guru_id === currentGuru.id);
     renderBerandaMurid();
+
+    if (pageLoaded.histori) loadHistori();
   } catch(e) {
     toast(e.message, 'error');
   }
@@ -547,6 +660,7 @@ async function loadHistori() {
 
     el.innerHTML = sesi.map(s => {
       const m = muridSaya.find(x => x.id === s.murid_id) || {};
+      const hasBody = s.today_lesson || s.foto_url || s.links;
       return `
       <div class="sesi-card">
         <div class="sesi-head">
@@ -554,14 +668,18 @@ async function loadHistori() {
             <div class="sesi-tgl">📅 ${s.tanggal}</div>
             <div class="sesi-murid">${m.nama || '–'} · <span class="badge ${progBadgeClass(m.program)}">${m.program||''}</span></div>
           </div>
-          <button onclick="hapusSesi('${s.id}')" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted)">🗑️</button>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button onclick='openEditKBM(${JSON.stringify(s)})' style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer">✏️ Edit</button>
+            <button onclick="hapusSesi('${s.id}')" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted)">🗑️</button>
+          </div>
         </div>
-        ${(s.today_lesson || s.foto_url) ? `
+        ${hasBody ? `
         <div class="sesi-body">
           ${s.today_lesson ? `<div class="sesi-lesson">📖 <b>Materi:</b> ${s.today_lesson}</div>` : ''}
           ${s.foto_url
             ? `<img src="${s.foto_url}" class="sesi-foto" onclick="lihatFoto('${s.foto_url}')" alt="Foto KBM">`
             : '<div class="sesi-foto-placeholder">📷 Tidak ada foto</div>'}
+          ${renderLinkChips(s.links)}
         </div>` : ''}
       </div>`;
     }).join('');

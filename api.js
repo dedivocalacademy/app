@@ -45,6 +45,7 @@ const API = {
   // addKBM({ guru_id, murid_id, tanggal, today_lesson, foto_url })
   getSesi:    (opts={}) => API.post({ action: 'getSesi', ...opts }),
   addKBM:     (d)       => API.post({ action: 'addKBM', ...d }),
+  updateKBM:  (d)       => API.post({ action: 'updateKBM', ...d }),
   deleteSesi: (id)      => API.post({ action: 'deleteSesi', id }),
 
   // ── SETTINGS ─────────────────────────────────────────────

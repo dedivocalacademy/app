@@ -340,6 +340,16 @@ function renderRecentKBM() {
   el.innerHTML = recent.map(s => kbmCardHtml(s)).join('');
 }
 
+function renderLinkChips(linksData) {
+  let links = [];
+  try { links = typeof linksData === 'string' ? JSON.parse(linksData||'[]') : (linksData||[]); } catch(e) {}
+  if (!links.length) return '';
+  return '<div style="margin-top:8px">' + links.map(l => {
+    let host = '';
+    try { host = new URL(l.url).hostname; } catch(e) {}
+    return `<a href="${l.url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;background:#F0FDFA;border:1.5px solid #CCFBF1;border-radius:9px;padding:8px 12px;text-decoration:none;color:var(--teal);font-size:13px;font-weight:700;margin-bottom:6px">🔗 ${l.title||l.url}${host?`<span style="font-size:11px;color:var(--muted);margin-left:auto">${host}</span>`:''}</a>`;
+  }).join('') + '</div>';
+}
 function kbmCardHtml(s) {
   return `
   <div class="kbm-card">
@@ -350,9 +360,10 @@ function kbmCardHtml(s) {
       </div>
       <span class="badge badge-teal">✓ Hadir</span>
     </div>
-    ${s.today_lesson ? `
+    ${(s.today_lesson || s.links) ? `
     <div class="kbm-body">
-      <div class="kbm-lesson">📖 <b>Materi:</b> ${s.today_lesson}</div>
+      ${s.today_lesson ? `<div class="kbm-lesson">📖 <b>Materi:</b> ${s.today_lesson}</div>` : ''}
+      ${renderLinkChips(s.links)}
     </div>` : ''}
   </div>`;
 }
