@@ -694,7 +694,7 @@ function searchMurid() {
 
   res.innerHTML = found.map(m => {
     const isMyMurid = m.guru_id === currentGuru.id;
-    const sisa  = Number(m.sisa_sesi ?? '–');
+    const sisa  = Number(m.sisa_sesi ?? 0);
     const paket = Number(m.paket_sesi || 0);
     const sisaTxt = paket ? `${sisa}/${paket} sesi tersisa` : 'Belum ada paket';
     const col   = sisaColor(sisa, paket);
@@ -703,10 +703,13 @@ function searchMurid() {
       <div class="murid-avatar" style="background:${isMyMurid ? 'var(--teal)' : 'var(--purple)'}">${m.nama.charAt(0)}</div>
       <div class="murid-info">
         <div class="murid-nama">${m.nama}</div>
-        <div class="murid-prog"><span class="badge ${progBadgeClass(m.program)}">${m.program||'–'}</span>${isMyMurid ? ' <span style="font-size:10px;color:var(--teal);font-weight:800">● murid saya</span>' : ''}</div>
-        <div class="murid-sisa"><span class="badge ${col}">🎯 ${sisaTxt}</span></div>
+        <div class="murid-prog">
+          <span class="badge ${progBadgeClass(m.program)}">${m.program||'–'}</span>
+          ${isMyMurid ? ' <span style="font-size:10px;color:var(--teal);font-weight:800">● murid saya</span>' : '<span style="font-size:10px;color:var(--muted);font-weight:700"> · pengganti</span>'}
+        </div>
+        ${isMyMurid ? `<div class="murid-sisa"><span class="badge ${col}">🎯 ${sisaTxt}</span></div>` : ''}
       </div>
-      ${isMyMurid ? `<button class="btn-input-kbm" onclick="openKBM('${m.id}','${m.nama.replace(/'/g,"\\'")}')">➕ Input KBM</button>` : ''}
+      <button class="btn-input-kbm" onclick="openKBM('${m.id}','${m.nama.replace(/'/g,"\\'")}')">➕ Input KBM</button>
     </div>`;
   }).join('');
 }
