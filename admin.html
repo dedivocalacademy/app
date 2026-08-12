@@ -307,10 +307,6 @@ tr:hover td{background:#FAFAF9}
               </select>
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-field"><label>Nominal SPP (Rp)</label><input type="number" id="fMuridSppNominal" placeholder="0" min="0"></div>
-            <div class="form-field"><label>Tgl Bayar SPP</label><input type="date" id="fMuridSppTgl"></div>
-          </div>
           <div class="form-actions">
             <button class="btn btn-primary" onclick="saveMurid()">💾 Simpan</button>
             <button class="btn btn-dark" onclick="toggleForm('form-murid')">Batal</button>
@@ -497,9 +493,32 @@ tr:hover td{background:#FAFAF9}
     <div class="form-row">
       <div class="form-field"><label>Status</label><select id="editMuridAktif"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
     </div>
-    <div class="form-row">
-      <div class="form-field"><label>Nominal SPP (Rp)</label><input type="number" id="editMuridSppNominal"></div>
-      <div class="form-field"><label>Tgl Bayar SPP</label><input type="date" id="editMuridSppTgl"></div>
+    <!-- SPP HISTORY SECTION -->
+    <div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">💳 Riwayat Pembayaran SPP</label>
+        <button onclick="toggleTambahSPP()" style="background:var(--teal);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">➕ Tambah</button>
+      </div>
+      <!-- Form tambah SPP (hidden by default) -->
+      <div id="formTambahSPP" style="display:none;background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px;border:1.5px solid var(--border)">
+        <div class="form-row">
+          <div class="form-field"><label>Tgl Bayar</label><input type="date" id="sppTglBayar"></div>
+          <div class="form-field"><label>Nominal (Rp)</label><input type="number" id="sppNominal" placeholder="0"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Paket Sesi</label><input type="number" id="sppPaketSesi" placeholder="cth: 8"></div>
+          <div class="form-field"><label>Tgl Mulai</label><input type="date" id="sppTglMulai"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label>Tgl Selesai</label><input type="date" id="sppTglSelesai"></div>
+          <div class="form-field"><label>Keterangan</label><input type="text" id="sppKeterangan" placeholder="opsional"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="simpanSPP()" class="btn btn-primary btn-sm">💾 Simpan</button>
+          <button onclick="toggleTambahSPP()" class="btn btn-dark btn-sm">Batal</button>
+        </div>
+      </div>
+      <div id="sppHistoriList"><span style="font-size:12px;color:var(--muted)">Memuat...</span></div>
     </div>
     <div style="margin-bottom:12px">
       <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Link Portal Murid</label>
@@ -800,9 +819,15 @@ async function hapusGuru(id, nama) {
 // ─── MURID ──────────────────────────────────────────
 async function loadMurid() {
   try {
-    [allGuru, allMurid] = await Promise.all([API.getGuru(), API.getMurid()]);
-    allGuru  = allGuru  || [];
-    allMurid = allMurid || [];
+    const [g, m, sppAll] = await Promise.all([API.getGuru(), API.getMurid(), API.getSPP()]);
+    allGuru  = g    || [];
+    allMurid = m    || [];
+    // Attach last SPP date to each murid
+    const sppList = sppAll || [];
+    allMurid = allMurid.map(mu => {
+      const sppMurid = sppList.filter(s => s.murid_id === mu.id).sort((a,b) => b.tgl_bayar.localeCompare(a.tgl_bayar));
+      return { ...mu, _lastSPP: sppMurid.length ? sppMurid[0].tgl_bayar : '' };
+    });
 
     // Populate guru dropdowns
     const opts = allGuru.map(g => `<option value="${g.id}">${g.nama}</option>`).join('');
@@ -840,8 +865,8 @@ function renderMuridTable() {
     const aktifBadge = m.aktif === 'nonaktif'
       ? '<span class="badge badge-gray">Nonaktif</span>'
       : '<span class="badge badge-green">Aktif</span>';
-    const sppStatus = m.tgl_bayar_spp
-      ? `<span class="badge badge-green">✓ ${m.tgl_bayar_spp}</span>`
+    const sppStatus = m._lastSPP
+      ? `<span class="badge badge-green">✓ ${m._lastSPP}</span>`
       : '<span class="badge badge-yellow">Belum</span>';
     const paket = Number(m.paket_sesi || 0);
     const sisa  = Number(m.sisa_sesi  ?? paket);
@@ -871,8 +896,6 @@ async function saveMurid() {
     fee_per_sesi: document.getElementById('fMuridFee').value,
     guru_id:      document.getElementById('fMuridGuru').value,
     aktif:        document.getElementById('fMuridAktif').value,
-    nominal_spp:  document.getElementById('fMuridSppNominal').value,
-    tgl_bayar_spp: document.getElementById('fMuridSppTgl').value,
   };
   if (!data.nama) return toast('Nama murid wajib diisi', 'error');
   try {
@@ -896,8 +919,7 @@ function openEditMurid(id) {
   document.getElementById('editMuridFee').value         = m.fee_per_sesi || '';
   document.getElementById('editMuridGuru').value        = m.guru_id || '';
   document.getElementById('editMuridAktif').value       = m.aktif || 'aktif';
-  document.getElementById('editMuridSppNominal').value  = m.nominal_spp || '';
-  document.getElementById('editMuridSppTgl').value      = m.tgl_bayar_spp || '';
+  loadSPPMurid(m.id);
   document.getElementById('editMuridLinkId').value      = m.link_id || '';
   document.getElementById('tambahSesiInput').value      = '';
   const paket = Number(m.paket_sesi || 0);
@@ -936,8 +958,6 @@ async function updateMurid() {
     fee_per_sesi: document.getElementById('editMuridFee').value,
     guru_id:      document.getElementById('editMuridGuru').value,
     aktif:        document.getElementById('editMuridAktif').value,
-    nominal_spp:  document.getElementById('editMuridSppNominal').value,
-    tgl_bayar_spp: document.getElementById('editMuridSppTgl').value,
   };
   if (!data.nama) return toast('Nama murid wajib diisi', 'error');
   try {
@@ -954,6 +974,82 @@ async function hapusMurid(id, nama) {
     await API.deleteMurid(id);
     toast('Murid dihapus', 'success');
     loadMurid();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ─── SPP ─────────────────────────────────────────────
+let currentSPPMuridId = null;
+
+async function loadSPPMurid(muridId) {
+  currentSPPMuridId = muridId;
+  const el = document.getElementById('sppHistoriList');
+  el.innerHTML = '<span style="font-size:12px;color:var(--muted)">Memuat...</span>';
+  document.getElementById('formTambahSPP').style.display = 'none';
+  try {
+    const list = await API.getSPP({ murid_id: muridId });
+    if (!list.length) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px">Belum ada riwayat SPP</div>';
+      return;
+    }
+    el.innerHTML = list.map(s => `
+      <div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);font-size:13px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-weight:800">💳 ${s.tgl_bayar} · <span style="color:var(--green)">Rp ${Number(s.nominal||0).toLocaleString('id-ID')}</span></div>
+            ${s.paket_sesi ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📦 ${s.paket_sesi} sesi${s.tgl_mulai ? ' · ' + s.tgl_mulai + (s.tgl_selesai ? ' s/d ' + s.tgl_selesai : '') : ''}</div>` : ''}
+            ${s.keterangan ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">📝 ${s.keterangan}</div>` : ''}
+          </div>
+          <button onclick="hapusSPP('${s.id}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:16px;padding:2px 6px">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--red);font-size:12px">' + e.message + '</div>';
+  }
+}
+
+function toggleTambahSPP() {
+  const f = document.getElementById('formTambahSPP');
+  const show = f.style.display === 'none';
+  f.style.display = show ? 'block' : 'none';
+  if (show) {
+    document.getElementById('sppTglBayar').value   = new Date().toISOString().split('T')[0];
+    document.getElementById('sppNominal').value    = '';
+    document.getElementById('sppPaketSesi').value  = '';
+    document.getElementById('sppTglMulai').value   = '';
+    document.getElementById('sppTglSelesai').value = '';
+    document.getElementById('sppKeterangan').value = '';
+  }
+}
+
+async function simpanSPP() {
+  const tgl = document.getElementById('sppTglBayar').value;
+  if (!tgl) return toast('Tgl bayar wajib diisi', 'error');
+  try {
+    await API.addSPP({
+      murid_id:    currentSPPMuridId,
+      tgl_bayar:   tgl,
+      nominal:     document.getElementById('sppNominal').value || 0,
+      paket_sesi:  document.getElementById('sppPaketSesi').value || 0,
+      tgl_mulai:   document.getElementById('sppTglMulai').value,
+      tgl_selesai: document.getElementById('sppTglSelesai').value,
+      keterangan:  document.getElementById('sppKeterangan').value,
+    });
+    toast('SPP berhasil disimpan! ✅', 'success');
+    toggleTambahSPP();
+    loadSPPMurid(currentSPPMuridId);
+    // Update kolom SPP di tabel murid
+    await loadMurid();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function hapusSPP(id) {
+  if (!confirm('Hapus data SPP ini?')) return;
+  try {
+    await API.deleteSPP(id);
+    toast('SPP dihapus', 'success');
+    loadSPPMurid(currentSPPMuridId);
+    await loadMurid();
   } catch(e) { toast(e.message, 'error'); }
 }
 

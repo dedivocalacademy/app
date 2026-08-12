@@ -2,11 +2,14 @@
 //  Dedi Vocal Academy (DiVA) – Google Apps Script Backend
 //
 //  Sheet struktur:
-//    guru   → id, nama, fee_per_sesi, kode_login, aktif
-//    murid  → id, nama, no_hp, program, paket_sesi, fee_per_sesi,
-//              guru_id, link_id, nominal_spp, tgl_bayar_spp, aktif
-//    sesi   → id, guru_id, murid_id, tanggal, bulan,
-//              today_lesson, foto_url, links, created_at
+//    guru     → id, nama, fee_per_sesi, kode_login, aktif
+//    murid    → id, nama, no_hp, program, paket_sesi, fee_per_sesi,
+//               guru_id, link_id, aktif
+//    sesi     → id, guru_id, murid_id, tanggal, bulan,
+//               today_lesson, foto_url, links, created_at
+//    spp      → id, murid_id, tgl_bayar, nominal, paket_sesi,
+//               tgl_mulai, tgl_selesai, keterangan
+//    settings → key, value
 //
 //  Deploy sebagai Web App:
 //    Execute as: Me
@@ -17,6 +20,7 @@ const S = {
   GURU:     'guru',
   MURID:    'murid',
   SESI:     'sesi',
+  SPP:      'spp',
   SETTINGS: 'settings',
 };
 
@@ -85,8 +89,14 @@ function setupSheets() {
 
   const muridSh = getSheet(S.MURID);
   if (muridSh.getLastRow() === 0) {
-    muridSh.appendRow(['id','nama','no_hp','program','paket_sesi','fee_per_sesi','guru_id','link_id','nominal_spp','tgl_bayar_spp','aktif']);
-    muridSh.getRange(1,1,1,11).setFontWeight('bold').setBackground('#1C1026').setFontColor('#FFFFFF');
+    muridSh.appendRow(['id','nama','no_hp','program','paket_sesi','fee_per_sesi','guru_id','link_id','aktif']);
+    muridSh.getRange(1,1,1,9).setFontWeight('bold').setBackground('#1C1026').setFontColor('#FFFFFF');
+  }
+
+  const sppSh = getSheet(S.SPP);
+  if (sppSh.getLastRow() === 0) {
+    sppSh.appendRow(['id','murid_id','tgl_bayar','nominal','paket_sesi','tgl_mulai','tgl_selesai','keterangan']);
+    sppSh.getRange(1,1,1,8).setFontWeight('bold').setBackground('#1C1026').setFontColor('#FFFFFF');
   }
 
   const sesiSh = getSheet(S.SESI);
@@ -149,6 +159,11 @@ function doPost(e) {
 
       // legacy compat
       case 'saveSesiGuru':    return saveSesiGuru(body);
+
+      case 'getSPP':         return getSPP(body);
+      case 'addSPP':         return addSPP(body);
+      case 'updateSPP':      return updateSPP(body);
+      case 'deleteSPP':      return deleteSPP(body.id);
 
       case 'getSettings':    return getSettings();
       case 'updateSettings': return updateSettings(body);
@@ -239,8 +254,7 @@ function addMurid(d) {
   const id = hexId(); const link_id = hexId();
   getSheet(S.MURID).appendRow([
     id, d.nama, d.no_hp||'', d.program||'', d.paket_sesi||0,
-    d.fee_per_sesi||0, d.guru_id||'', link_id,
-    d.nominal_spp||0, d.tgl_bayar_spp||'', d.aktif||'aktif',
+    d.fee_per_sesi||0, d.guru_id||'', link_id, d.aktif||'aktif',
   ]);
   return ok({ id, link_id });
 }
@@ -256,8 +270,7 @@ function updateMurid(d) {
       set('nama', d.nama); set('no_hp', d.no_hp||'');
       set('program', d.program||''); set('paket_sesi', d.paket_sesi||0);
       set('fee_per_sesi', d.fee_per_sesi||0);
-      set('guru_id', d.guru_id||''); set('nominal_spp', d.nominal_spp||0);
-      set('tgl_bayar_spp', d.tgl_bayar_spp||''); set('aktif', d.aktif||'aktif');
+      set('guru_id', d.guru_id||''); set('aktif', d.aktif||'aktif');
       return ok({ updated: true });
     }
   }
@@ -273,6 +286,56 @@ function deleteMurid(id) {
     if (String(vals[r][idx]) === String(id)) { sh.deleteRow(r+1); return ok({ deleted: true }); }
   }
   return err('Murid tidak ditemukan');
+}
+
+// ── SPP ──────────────────────────────────────────────────
+
+function getSPP(opts) {
+  let rows = sheetRows(S.SPP);
+  if (opts && opts.murid_id) rows = rows.filter(r => String(r.murid_id) === String(opts.murid_id));
+  rows.sort((a,b) => String(b.tgl_bayar).localeCompare(String(a.tgl_bayar)));
+  return ok(rows);
+}
+
+function addSPP(d) {
+  if (!d.murid_id || !d.tgl_bayar) return err('murid_id dan tgl_bayar wajib diisi');
+  const id = hexId();
+  getSheet(S.SPP).appendRow([
+    id, d.murid_id, d.tgl_bayar, d.nominal||0,
+    d.paket_sesi||0, d.tgl_mulai||'', d.tgl_selesai||'', d.keterangan||'',
+  ]);
+  return ok({ id });
+}
+
+function updateSPP(d) {
+  if (!d.id) return err('ID SPP diperlukan');
+  const sh   = getSheet(S.SPP);
+  const vals = sh.getDataRange().getValues();
+  const h    = vals[0].map(x => String(x).trim());
+  for (let r = 1; r < vals.length; r++) {
+    if (String(vals[r][h.indexOf('id')]) === String(d.id)) {
+      const set = (col, val) => { const i = h.indexOf(col); if (i>=0) sh.getRange(r+1,i+1).setValue(val); };
+      if (d.tgl_bayar   !== undefined) set('tgl_bayar',   d.tgl_bayar);
+      if (d.nominal     !== undefined) set('nominal',     d.nominal||0);
+      if (d.paket_sesi  !== undefined) set('paket_sesi',  d.paket_sesi||0);
+      if (d.tgl_mulai   !== undefined) set('tgl_mulai',   d.tgl_mulai||'');
+      if (d.tgl_selesai !== undefined) set('tgl_selesai', d.tgl_selesai||'');
+      if (d.keterangan  !== undefined) set('keterangan',  d.keterangan||'');
+      return ok({ updated: true });
+    }
+  }
+  return err('SPP tidak ditemukan');
+}
+
+function deleteSPP(id) {
+  if (!id) return err('ID diperlukan');
+  const sh   = getSheet(S.SPP);
+  const vals = sh.getDataRange().getValues();
+  const idx  = vals[0].map(x => String(x).trim()).indexOf('id');
+  for (let r = vals.length-1; r >= 1; r--) {
+    if (String(vals[r][idx]) === String(id)) { sh.deleteRow(r+1); return ok({ deleted: true }); }
+  }
+  return err('SPP tidak ditemukan');
 }
 
 // ── SETTINGS ─────────────────────────────────────────────

@@ -225,11 +225,27 @@ main{max-width:680px;margin:0 auto;padding:16px 14px 16px}
 
     <!-- HISTORI -->
     <div class="tab-page" id="tab-histori">
-      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
-        <input type="month" id="filtHistoriBulan" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;outline:none" onchange="loadHistori()">
-        <button onclick="loadHistori()" style="background:var(--teal);color:#fff;border:none;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">Filter</button>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+        <select id="filtHistoriMurid" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;outline:none;background:var(--white)" onchange="loadHistori()">
+          <option value="">Semua Murid</option>
+        </select>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="month" id="filtHistoriBulan" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;outline:none">
+          <button onclick="loadHistori()" style="background:var(--teal);color:#fff;border:none;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">Filter</button>
+        </div>
       </div>
       <div id="historiContent"><span class="spinner"></span></div>
+    </div>
+
+    <!-- CARI MURID -->
+    <div class="tab-page" id="tab-cari">
+      <div style="position:relative;margin-bottom:12px">
+        <input type="text" id="searchMuridInput" placeholder="🔍 Cari nama murid DiVA..."
+          style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:14px;font-weight:600;outline:none;background:var(--white)"
+          oninput="searchMurid()" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div id="searchMuridHint" style="text-align:center;padding:20px;color:var(--muted);font-size:13px;font-weight:600">Ketik nama murid untuk mencari</div>
+      <div id="searchMuridResult"></div>
     </div>
 
     <!-- FEE -->
@@ -246,6 +262,7 @@ main{max-width:680px;margin:0 auto;padding:16px 14px 16px}
   <nav class="bottom-nav">
     <button class="nav-item active" onclick="showPage('beranda',this)"><span class="nav-icon">🏠</span><span class="nav-label">Beranda</span></button>
     <button class="nav-item" onclick="showPage('histori',this)"><span class="nav-icon">📋</span><span class="nav-label">Histori KBM</span></button>
+    <button class="nav-item" onclick="showPage('cari',this)"><span class="nav-icon">🔍</span><span class="nav-label">Cari Murid</span></button>
     <button class="nav-item" onclick="showPage('fee',this)"><span class="nav-icon">💰</span><span class="nav-label">Fee Saya</span></button>
   </nav>
 </div>
@@ -313,6 +330,7 @@ main{max-width:680px;margin:0 auto;padding:16px 14px 16px}
 <script>
 let currentGuru    = null;
 let muridSaya      = [];
+let allMuridDiVA   = [];   // semua murid untuk global search
 let kbmMuridId     = null;
 let editingKBMId   = null;
 let existingFotoUrl = '';
@@ -388,7 +406,12 @@ async function initApp() {
       API.getMurid(),
       API.getSesi({ guru_id: currentGuru.id, bulan: bln }),
     ]);
-    muridSaya = (allMurid || []).filter(m => m.guru_id === currentGuru.id);
+    allMuridDiVA = allMurid || [];
+    muridSaya    = allMuridDiVA.filter(m => m.guru_id === currentGuru.id);
+
+    // Populate dropdown filter murid di histori
+    const muridOpts = muridSaya.map(m => `<option value="${m.id}">${m.nama}</option>`).join('');
+    document.getElementById('filtHistoriMurid').innerHTML = '<option value="">Semua Murid</option>' + muridOpts;
 
     const totalSesi = (sesi || []).length;
     const totalFee  = hitungTotalFee(sesi || []);
@@ -647,15 +670,60 @@ function showPage(id, btn) {
   btn.classList.add('active');
   if (!pageLoaded[id]) { pageLoaded[id] = true; if (id==='fee') loadFeeRekap(); }
   if (id === 'histori') loadHistori();
+  if (id === 'cari') document.getElementById('searchMuridInput').focus();
+}
+
+// ─── GLOBAL SEARCH MURID ────────────────────────────
+function searchMurid() {
+  const q   = document.getElementById('searchMuridInput').value.trim().toLowerCase();
+  const res = document.getElementById('searchMuridResult');
+  const hint = document.getElementById('searchMuridHint');
+
+  if (!q) {
+    res.innerHTML = '';
+    hint.style.display = 'block';
+    return;
+  }
+  hint.style.display = 'none';
+
+  const found = allMuridDiVA.filter(m => m.nama.toLowerCase().includes(q));
+  if (!found.length) {
+    res.innerHTML = '<div class="empty-state">Murid tidak ditemukan</div>';
+    return;
+  }
+
+  res.innerHTML = found.map(m => {
+    const isMyMurid = m.guru_id === currentGuru.id;
+    const sisa  = Number(m.sisa_sesi ?? '–');
+    const paket = Number(m.paket_sesi || 0);
+    const sisaTxt = paket ? `${sisa}/${paket} sesi tersisa` : 'Belum ada paket';
+    const col   = sisaColor(sisa, paket);
+    return `
+    <div class="murid-kbm-card">
+      <div class="murid-avatar" style="background:${isMyMurid ? 'var(--teal)' : 'var(--purple)'}">${m.nama.charAt(0)}</div>
+      <div class="murid-info">
+        <div class="murid-nama">${m.nama}</div>
+        <div class="murid-prog"><span class="badge ${progBadgeClass(m.program)}">${m.program||'–'}</span>${isMyMurid ? ' <span style="font-size:10px;color:var(--teal);font-weight:800">● murid saya</span>' : ''}</div>
+        <div class="murid-sisa"><span class="badge ${col}">🎯 ${sisaTxt}</span></div>
+      </div>
+      ${isMyMurid ? `<button class="btn-input-kbm" onclick="openKBM('${m.id}','${m.nama.replace(/'/g,"\\'")}')">➕ Input KBM</button>` : ''}
+    </div>`;
+  }).join('');
 }
 
 // ─── HISTORI KBM ────────────────────────────────────
 async function loadHistori() {
-  const bulan = document.getElementById('filtHistoriBulan').value || thisBulan();
-  const el    = document.getElementById('historiContent');
+  const bulan    = document.getElementById('filtHistoriBulan').value;
+  const muridId  = document.getElementById('filtHistoriMurid').value;
+  const el       = document.getElementById('historiContent');
   el.innerHTML = '<div style="text-align:center;padding:20px"><span class="spinner"></span></div>';
   try {
-    const sesi = await API.getSesi({ guru_id: currentGuru.id, bulan }) || [];
+    const opts = { guru_id: currentGuru.id };
+    if (bulan)   opts.bulan    = bulan;
+    if (muridId) opts.murid_id = muridId;
+    // Kalau tidak ada filter sama sekali, default ke bulan ini
+    if (!bulan && !muridId) opts.bulan = thisBulan();
+    const sesi = await API.getSesi(opts) || [];
     if (!sesi.length) { el.innerHTML = '<div class="empty-state">Belum ada KBM di bulan ini</div>'; return; }
 
     el.innerHTML = sesi.map(s => {

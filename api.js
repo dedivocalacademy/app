@@ -48,6 +48,12 @@ const API = {
   updateKBM:  (d)       => API.post({ action: 'updateKBM', ...d }),
   deleteSesi: (id)      => API.post({ action: 'deleteSesi', id }),
 
+  // ── SPP ──────────────────────────────────────────────────
+  getSPP:    (opts={}) => API.post({ action: 'getSPP', ...opts }),
+  addSPP:    (d)       => API.post({ action: 'addSPP', ...d }),
+  updateSPP: (d)       => API.post({ action: 'updateSPP', ...d }),
+  deleteSPP: (id)      => API.post({ action: 'deleteSPP', id }),
+
   // ── SETTINGS ─────────────────────────────────────────────
   getSettings:    ()  => API.post({ action: 'getSettings' }),
   updateSettings: (s) => API.post({ action: 'updateSettings', settings: s }),
