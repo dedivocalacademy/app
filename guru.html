@@ -505,7 +505,7 @@ function openEditKBM(s) {
   editingKBMId    = s.id;
   existingFotoUrl = s.foto_url || '';
   kbmMuridId      = s.murid_id;
-  const m = muridSaya.find(x => x.id === s.murid_id) || {};
+  const m = allMuridDiVA.find(x => x.id === s.murid_id) || muridSaya.find(x => x.id === s.murid_id) || {};
   document.getElementById('kbmModalTitle').textContent = '✏️ Edit KBM';
   document.getElementById('kbmMuridLabel').textContent = (m.nama||'–') + ' · ' + s.tanggal;
   document.getElementById('kbmTanggal').value = s.tanggal || '';
