@@ -36,6 +36,7 @@ const API = {
   // Response murid sudah include: sesi_terpakai, sisa_sesi
   getMurid:       (opts={}) => API.post({ action: 'getMurid', ...opts }),
   getMuridByLink: (link_id) => API.get({ action: 'getMuridByLink', link_id }),
+  getSPPByLink:   (link_id) => API.get({ action: 'getSPPByLink', link_id }),
   addMurid:       (d)       => API.post({ action: 'addMurid', ...d }),
   updateMurid:    (d)       => API.post({ action: 'updateMurid', ...d }),
   deleteMurid:    (id)      => API.post({ action: 'deleteMurid', id }),

@@ -86,8 +86,15 @@ main{max-width:680px;margin:0 auto;padding:16px 14px 16px}
 /* HISTORI SESI */
 .sesi-card{border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px}
 .sesi-head{padding:12px 14px;background:var(--bg);display:flex;align-items:center;justify-content:space-between}
-.sesi-tgl{font-weight:800;font-size:14px}
-.sesi-murid{font-size:12px;color:var(--muted);margin-top:2px}
+.sesi-tgl{font-size:12px;color:var(--muted);font-weight:700;margin-top:3px}
+.sesi-murid{font-weight:800;font-size:17px;line-height:1.2}
+
+/* PAGINATION */
+.pager{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+.pager button{background:var(--white);border:1.5px solid var(--border);color:var(--dark);border-radius:9px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;transition:all .2s}
+.pager button:hover:not(:disabled){border-color:var(--teal);color:var(--teal)}
+.pager button:disabled{opacity:.4;cursor:not-allowed}
+.pager .pg-info{font-size:12px;font-weight:700;color:var(--muted);padding:0 4px}
 .sesi-body{padding:12px 14px;border-top:1px solid var(--border)}
 .sesi-lesson{font-size:13px;color:var(--dark);line-height:1.5;margin-bottom:8px}
 .sesi-foto{width:100%;max-height:200px;object-fit:cover;border-radius:8px;cursor:pointer}
@@ -335,6 +342,9 @@ let kbmMuridId     = null;
 let editingKBMId   = null;
 let existingFotoUrl = '';
 let pageLoaded     = {};
+let historiData    = [];
+let historiPage    = 1;
+const HISTORI_PER_PAGE = 5;
 
 function showLoading(v, txt='Memuat data...') {
   document.getElementById('loadingOverlay').style.display = v ? 'flex' : 'none';
@@ -726,37 +736,60 @@ async function loadHistori() {
     if (muridId) opts.murid_id = muridId;
     // Kalau tidak ada filter sama sekali, default ke bulan ini
     if (!bulan && !muridId) opts.bulan = thisBulan();
-    const sesi = await API.getSesi(opts) || [];
-    if (!sesi.length) { el.innerHTML = '<div class="empty-state">Belum ada KBM di bulan ini</div>'; return; }
-
-    el.innerHTML = sesi.map(s => {
-      const m = muridSaya.find(x => x.id === s.murid_id) || {};
-      const hasBody = s.today_lesson || s.foto_url || s.links;
-      return `
-      <div class="sesi-card">
-        <div class="sesi-head">
-          <div>
-            <div class="sesi-tgl">📅 ${s.tanggal}</div>
-            <div class="sesi-murid">${m.nama || '–'} · <span class="badge ${progBadgeClass(m.program)}">${m.program||''}</span></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <button onclick='openEditKBM(${JSON.stringify(s)})' style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer">✏️ Edit</button>
-            <button onclick="hapusSesi('${s.id}')" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted)">🗑️</button>
-          </div>
-        </div>
-        ${hasBody ? `
-        <div class="sesi-body">
-          ${s.today_lesson ? `<div class="sesi-lesson">📖 <b>Materi:</b> ${s.today_lesson}</div>` : ''}
-          ${s.foto_url
-            ? `<img src="${s.foto_url}" class="sesi-foto" onclick="lihatFoto('${s.foto_url}')" alt="Foto KBM">`
-            : '<div class="sesi-foto-placeholder">📷 Tidak ada foto</div>'}
-          ${renderLinkChips(s.links)}
-        </div>` : ''}
-      </div>`;
-    }).join('');
+    historiData = await API.getSesi(opts) || [];
+    historiPage = 1;
+    renderHistori();
   } catch(e) {
     el.innerHTML = '<div style="color:red;text-align:center">' + e.message + '</div>';
   }
+}
+
+function renderHistori() {
+  const el = document.getElementById('historiContent');
+  if (!historiData.length) { el.innerHTML = '<div class="empty-state">Belum ada KBM</div>'; return; }
+
+  const totalPages = Math.ceil(historiData.length / HISTORI_PER_PAGE);
+  if (historiPage > totalPages) historiPage = totalPages;
+  const start = (historiPage - 1) * HISTORI_PER_PAGE;
+  const slice = historiData.slice(start, start + HISTORI_PER_PAGE);
+
+  el.innerHTML = slice.map(s => {
+    const m = allMuridDiVA.find(x => x.id === s.murid_id) || muridSaya.find(x => x.id === s.murid_id) || {};
+    const hasBody = s.today_lesson || s.foto_url || s.links;
+    return `
+    <div class="sesi-card">
+      <div class="sesi-head">
+        <div style="min-width:0;flex:1">
+          <div class="sesi-murid">${m.nama || '–'}</div>
+          <div style="margin-top:4px"><span class="badge ${progBadgeClass(m.program)}">${m.program||'–'}</span></div>
+          <div class="sesi-tgl">📅 ${s.tanggal}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <button onclick='openEditKBM(${JSON.stringify(s)})' style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer">✏️ Edit</button>
+          <button onclick="hapusSesi('${s.id}')" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--muted)">🗑️</button>
+        </div>
+      </div>
+      ${hasBody ? `
+      <div class="sesi-body">
+        ${s.today_lesson ? `<div class="sesi-lesson">📖 <b>Materi:</b> ${s.today_lesson}</div>` : ''}
+        ${s.foto_url
+          ? `<img src="${s.foto_url}" class="sesi-foto" onclick="lihatFoto('${s.foto_url}')" alt="Foto KBM">`
+          : '<div class="sesi-foto-placeholder">📷 Tidak ada foto</div>'}
+        ${renderLinkChips(s.links)}
+      </div>` : ''}
+    </div>`;
+  }).join('') + (totalPages > 1 ? `
+    <div class="pager">
+      <button onclick="gotoHistoriPage(${historiPage-1})" ${historiPage<=1?'disabled':''}>‹ Prev</button>
+      <span class="pg-info">Hal ${historiPage} / ${totalPages} · ${historiData.length} sesi</span>
+      <button onclick="gotoHistoriPage(${historiPage+1})" ${historiPage>=totalPages?'disabled':''}>Next ›</button>
+    </div>` : `<div class="pager"><span class="pg-info">${historiData.length} sesi</span></div>`);
+}
+
+function gotoHistoriPage(p) {
+  historiPage = p;
+  renderHistori();
+  document.getElementById('tab-histori').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 async function hapusSesi(id) {

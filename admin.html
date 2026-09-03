@@ -189,6 +189,7 @@ tr:hover td{background:#FAFAF9}
     <button class="tab-btn active" onclick="showTab('dashboard',this)">📊 Dashboard</button>
     <button class="tab-btn" onclick="showTab('guru',this)">👩‍🏫 Guru</button>
     <button class="tab-btn" onclick="showTab('murid',this)">👨‍🎓 Murid</button>
+    <button class="tab-btn" onclick="showTab('penagihan',this)">💳 Penagihan</button>
     <button class="tab-btn" onclick="showTab('laporan',this)">📋 Laporan Sesi</button>
     <button class="tab-btn" onclick="showTab('penggajian',this)">💰 Penggajian</button>
     <button class="tab-btn" onclick="showTab('settings',this)">⚙️ Pengaturan</button>
@@ -336,6 +337,31 @@ tr:hover td{background:#FAFAF9}
       </div>
     </div>
 
+    <!-- PENAGIHAN -->
+    <div class="tab-page" id="tab-penagihan">
+      <div class="section-card">
+        <div class="card-head">
+          <h3>💳 Penagihan SPP Murid</h3>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">💡 Sisa sesi = total sesi dibayar − sesi terpakai. Nilai <b style="color:var(--red)">minus</b> berarti murid les melebihi yang sudah dibayar.</div>
+        <div class="filter-row" style="margin-bottom:14px">
+          <input type="text" id="filterPenagihanNama" placeholder="Cari nama..." oninput="renderPenagihanTable()">
+          <select id="filterPenagihanStatus" onchange="renderPenagihanTable()">
+            <option value="">Semua Status</option>
+            <option value="perlu">⚠️ Perlu Ditagih (sisa ≤ 0)</option>
+            <option value="hampir">🔔 Hampir Habis (sisa 1)</option>
+            <option value="aman">✅ Aman</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nama Murid</th><th>Program</th><th>Paket/Bayar</th><th>Sisa Sesi</th><th>Terpakai</th><th>Bayar Terakhir</th><th>Aksi</th></tr></thead>
+            <tbody id="penagihanTbody"><tr><td colspan="7" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- LAPORAN SESI -->
     <div class="tab-page" id="tab-laporan">
       <div class="section-card">
@@ -475,15 +501,10 @@ tr:hover td{background:#FAFAF9}
         <input type="text" id="editMuridProgram" list="programOptions" placeholder="Ketik atau pilih program...">
       </div>
       <div class="form-field">
-        <label>Paket Sesi (Total)</label>
-        <input type="number" id="editMuridPaket">
-        <div style="margin-top:8px;display:flex;gap:6px;align-items:center">
-          <span style="font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap">➕ Tambah:</span>
-          <input type="number" id="tambahSesiInput" placeholder="cth: 8" min="1"
-            style="width:80px;padding:6px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;outline:none">
-          <button onclick="tambahSesi()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer">Tambah</button>
-        </div>
+        <label>Paket Sesi per Pembayaran</label>
+        <input type="number" id="editMuridPaket" placeholder="cth: 4">
         <div style="font-size:11px;color:var(--muted);margin-top:4px" id="editMuridSisaInfo"></div>
+        <div style="font-size:11px;color:var(--teal);margin-top:4px;font-weight:700">💡 Sesi bertambah otomatis lewat tab Penagihan</div>
       </div>
     </div>
     <div class="form-row">
@@ -492,29 +513,6 @@ tr:hover td{background:#FAFAF9}
     </div>
     <div class="form-row">
       <div class="form-field"><label>Status</label><select id="editMuridAktif"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
-    </div>
-    <!-- SPP HISTORY SECTION -->
-    <div style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">💳 Riwayat Pembayaran SPP</label>
-        <button onclick="toggleTambahSPP()" style="background:var(--teal);color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">➕ Tambah</button>
-      </div>
-      <!-- Form tambah SPP (hidden by default) -->
-      <div id="formTambahSPP" style="display:none;background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px;border:1.5px solid var(--border)">
-        <div class="form-row">
-          <div class="form-field"><label>Tgl Bayar</label><input type="date" id="sppTglBayar"></div>
-          <div class="form-field"><label>Nominal (Rp)</label><input type="number" id="sppNominal" placeholder="0"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-field"><label>Paket Sesi</label><input type="number" id="sppPaketSesi" placeholder="cth: 8"></div>
-          <div class="form-field"><label>Keterangan</label><input type="text" id="sppKeterangan" placeholder="opsional"></div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="simpanSPP()" class="btn btn-primary btn-sm">💾 Simpan</button>
-          <button onclick="toggleTambahSPP()" class="btn btn-dark btn-sm">Batal</button>
-        </div>
-      </div>
-      <div id="sppHistoriList"><span style="font-size:12px;color:var(--muted)">Memuat...</span></div>
     </div>
     <div style="margin-bottom:12px">
       <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Link Portal Murid</label>
@@ -527,6 +525,39 @@ tr:hover td{background:#FAFAF9}
       <button class="btn btn-primary" onclick="updateMurid()">💾 Simpan</button>
       <button class="btn btn-dark" onclick="closeModal('modalEditMurid')">Batal</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL RIWAYAT SPP MURID -->
+<div class="modal-overlay" id="modalSPP">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modalSPP')">✕</button>
+    <div class="modal-title" id="sppModalTitle">💳 Riwayat SPP</div>
+    <div class="modal-sub" id="sppModalSub" style="font-size:13px;color:var(--muted);margin-bottom:16px">–</div>
+
+    <div id="sppRingkasan" style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:14px;border:1.5px solid var(--border)"></div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Riwayat Pembayaran</label>
+      <button onclick="toggleTambahSPP()" style="background:var(--teal);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">➕ Catat Pembayaran</button>
+    </div>
+
+    <div id="formTambahSPP" style="display:none;background:#F0FDFA;border-radius:12px;padding:14px;margin-bottom:12px;border:1.5px solid #CCFBF1">
+      <div class="form-row">
+        <div class="form-field"><label>Tgl Bayar</label><input type="date" id="sppTglBayar"></div>
+        <div class="form-field"><label>Nominal (Rp)</label><input type="number" id="sppNominal" placeholder="0"></div>
+      </div>
+      <div class="form-field" style="margin-bottom:10px">
+        <label>Keterangan (opsional)</label><input type="text" id="sppKeterangan" placeholder="cth: transfer BCA">
+      </div>
+      <div style="font-size:12px;color:var(--teal);font-weight:700;margin-bottom:10px" id="sppPaketInfo">📦 Akan menambah – sesi</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="simpanSPP()" class="btn btn-primary btn-sm">💾 Simpan</button>
+        <button onclick="toggleTambahSPP()" class="btn btn-dark btn-sm">Batal</button>
+      </div>
+    </div>
+
+    <div id="sppHistoriList"><span style="font-size:12px;color:var(--muted)">Memuat...</span></div>
   </div>
 </div>
 
@@ -616,6 +647,7 @@ function loadTab(id) {
   if (id === 'dashboard') loadDashboard();
   if (id === 'guru')      loadGuru();
   if (id === 'murid')     loadMurid();
+  if (id === 'penagihan') loadPenagihan();
   if (id === 'laporan')   initLaporan();
   if (id === 'penggajian') initPenggajian();
   if (id === 'settings')  loadSettings();
@@ -815,15 +847,9 @@ async function hapusGuru(id, nama) {
 // ─── MURID ──────────────────────────────────────────
 async function loadMurid() {
   try {
-    const [g, m, sppAll] = await Promise.all([API.getGuru(), API.getMurid(), API.getSPP()]);
-    allGuru  = g    || [];
-    allMurid = m    || [];
-    // Attach last SPP date to each murid
-    const sppList = sppAll || [];
-    allMurid = allMurid.map(mu => {
-      const sppMurid = sppList.filter(s => s.murid_id === mu.id).sort((a,b) => b.tgl_bayar.localeCompare(a.tgl_bayar));
-      return { ...mu, _lastSPP: sppMurid.length ? sppMurid[0].tgl_bayar : '' };
-    });
+    const [g, m] = await Promise.all([API.getGuru(), API.getMurid()]);
+    allGuru  = g || [];
+    allMurid = m || [];
 
     // Populate guru dropdowns
     const opts = allGuru.map(g => `<option value="${g.id}">${g.nama}</option>`).join('');
@@ -862,12 +888,12 @@ function renderMuridTable() {
     const aktifBadge = m.aktif === 'nonaktif'
       ? '<span class="badge badge-gray">Nonaktif</span>'
       : '<span class="badge badge-green">Aktif</span>';
-    const sppStatus = m._lastSPP
-      ? `<span class="badge badge-green">✓ ${m._lastSPP}</span>`
+    const sppStatus = m.tgl_bayar_akhir
+      ? `<span class="badge badge-green">✓ ${m.tgl_bayar_akhir}</span>`
       : '<span class="badge badge-yellow">Belum</span>';
     const paket = Number(m.paket_sesi || 0);
-    const sisa  = Number(m.sisa_sesi  ?? paket);
-    const pctColor = !paket ? 'badge-gray' : (sisa/paket <= 0.25 ? 'badge-red' : 'badge-green');
+    const sisa  = Number(m.sisa_sesi  ?? 0);
+    const pctColor = sisa <= 0 ? 'badge-red' : (sisa === 1 ? 'badge-yellow' : 'badge-green');
     const portalUrl = m.link_id ? `${BASE_URL}ortu.html?id=${m.link_id}&n=${encodeURIComponent(m.nama)}` : '';
     return `<tr>
       <td><b>${m.nama}</b></td>
@@ -920,23 +946,10 @@ function openEditMurid(id) {
   document.getElementById('editMuridAktif').value       = m.aktif || 'aktif';
   loadSPPMurid(m.id);
   document.getElementById('editMuridLinkId').value      = m.link_id || '';
-  document.getElementById('tambahSesiInput').value      = '';
-  const paket = Number(m.paket_sesi || 0);
-  const sisa  = Number(m.sisa_sesi  ?? paket);
+  const sisa = Number(m.sisa_sesi ?? 0);
   document.getElementById('editMuridSisaInfo').textContent =
-    paket ? `Saat ini: ${paket} paket · ${sisa} sisa · ${Number(m.sesi_terpakai||0)} terpakai` : '';
+    `Sisa saat ini: ${sisa} sesi · ${Number(m.sesi_terpakai||0)} terpakai · ${Number(m.jumlah_bayar||0)}× bayar`;
   openModal('modalEditMurid');
-}
-
-function tambahSesi() {
-  const tambah  = Number(document.getElementById('tambahSesiInput').value || 0);
-  if (!tambah || tambah < 1) return toast('Masukkan jumlah sesi yang ditambah', 'error');
-  const current = Number(document.getElementById('editMuridPaket').value || 0);
-  const newTotal = current + tambah;
-  document.getElementById('editMuridPaket').value = newTotal;
-  document.getElementById('tambahSesiInput').value = '';
-  document.getElementById('editMuridSisaInfo').textContent = `Setelah simpan: ${newTotal} paket total`;
-  toast(`Paket +${tambah} → total ${newTotal} sesi`, 'success');
 }
 function copyLink() {
   const id     = document.getElementById('editMuridId').value;
@@ -976,47 +989,125 @@ async function hapusMurid(id, nama) {
   } catch(e) { toast(e.message, 'error'); }
 }
 
-// ─── SPP ─────────────────────────────────────────────
+// ─── PENAGIHAN ───────────────────────────────────────
 let currentSPPMuridId = null;
+
+async function loadPenagihan() {
+  const tb = document.getElementById('penagihanTbody');
+  tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px"><span class="spinner"></span></td></tr>';
+  try {
+    if (!allGuru.length) allGuru = await API.getGuru() || [];
+    allMurid = await API.getMurid() || [];
+    renderPenagihanTable();
+  } catch(e) {
+    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;color:red;padding:16px">${e.message}</td></tr>`;
+  }
+}
+
+function renderPenagihanTable() {
+  const tb     = document.getElementById('penagihanTbody');
+  const nama   = (document.getElementById('filterPenagihanNama').value || '').toLowerCase();
+  const status = document.getElementById('filterPenagihanStatus').value;
+
+  let list = allMurid.filter(m => m.aktif !== 'nonaktif');
+  if (nama) list = list.filter(m => m.nama.toLowerCase().includes(nama));
+  if (status === 'perlu')  list = list.filter(m => Number(m.sisa_sesi ?? 0) <= 0);
+  if (status === 'hampir') list = list.filter(m => Number(m.sisa_sesi ?? 0) === 1);
+  if (status === 'aman')   list = list.filter(m => Number(m.sisa_sesi ?? 0) > 1);
+
+  // Urutkan: yang paling perlu ditagih di atas
+  list.sort((a,b) => Number(a.sisa_sesi ?? 0) - Number(b.sisa_sesi ?? 0));
+
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="7" class="empty-state">Tidak ada murid</td></tr>'; return; }
+
+  tb.innerHTML = list.map(m => {
+    const sisa  = Number(m.sisa_sesi ?? 0);
+    const paket = Number(m.paket_sesi || 0);
+    const badge = sisa <= 0 ? 'badge-red' : (sisa === 1 ? 'badge-yellow' : 'badge-green');
+    const icon  = sisa <= 0 ? '⚠️' : (sisa === 1 ? '🔔' : '✅');
+    return `<tr>
+      <td><b>${m.nama}</b></td>
+      <td><span class="badge ${progBadgeClass(m.program)}">${m.program || '–'}</span></td>
+      <td>${paket} sesi</td>
+      <td><span class="badge ${badge}" style="font-size:13px">${icon} ${sisa}</span></td>
+      <td>${Number(m.sesi_terpakai||0)}</td>
+      <td>${m.tgl_bayar_akhir ? `<span class="badge badge-green">${m.tgl_bayar_akhir}</span>` : '<span class="badge badge-yellow">Belum</span>'}</td>
+      <td><button class="btn btn-sm btn-teal" onclick="openSPPMurid('${m.id}')">💳 Kelola</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function openSPPMurid(muridId) {
+  currentSPPMuridId = muridId;
+  const m = allMurid.find(x => x.id === muridId) || {};
+  document.getElementById('sppModalTitle').textContent = '💳 ' + (m.nama || 'Riwayat SPP');
+  document.getElementById('sppModalSub').textContent   = (m.program || '–') + ' · paket ' + Number(m.paket_sesi||0) + ' sesi per pembayaran';
+  document.getElementById('sppPaketInfo').textContent  = `📦 Akan menambah ${Number(m.paket_sesi||0)} sesi`;
+  document.getElementById('formTambahSPP').style.display = 'none';
+  document.getElementById('sppRingkasan').innerHTML = '';
+  document.getElementById('sppHistoriList').innerHTML = '<span style="font-size:12px;color:var(--muted)">Memuat...</span>';
+  openModal('modalSPP');
+  loadSPPMurid(muridId);
+}
 
 async function loadSPPMurid(muridId) {
   currentSPPMuridId = muridId;
-  const el = document.getElementById('sppHistoriList');
-  el.innerHTML = '<span style="font-size:12px;color:var(--muted)">Memuat...</span>';
-  document.getElementById('formTambahSPP').style.display = 'none';
+  const el  = document.getElementById('sppHistoriList');
+  const rEl = document.getElementById('sppRingkasan');
   try {
     const [sppRaw, sesiRaw] = await Promise.all([
       API.getSPP({ murid_id: muridId }),
       API.getSesi({ murid_id: muridId }),
     ]);
 
-    if (!sppRaw.length) {
-      el.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:10px">Belum ada riwayat SPP</div>';
-      return;
-    }
+    const sppList  = [...(sppRaw||[])].sort((a,b)  => String(a.tgl_bayar).localeCompare(String(b.tgl_bayar)));
+    const sesiList = [...(sesiRaw||[])].sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
-    // Urutkan SPP dari terlama ke terbaru
-    const sppList  = [...sppRaw].sort((a,b)  => a.tgl_bayar.localeCompare(b.tgl_bayar));
-    // Urutkan sesi dari terlama ke terbaru
-    const sesiList = [...sesiRaw].sort((a,b) => a.tanggal.localeCompare(b.tanggal));
-
-    // Assign sesi ke SPP secara berurutan
+    // Assign sesi ke tiap periode SPP secara berurutan
     let sesiIdx = 0;
     sppList.forEach(spp => {
       const paket = Number(spp.paket_sesi || 0);
       spp._sesi = [];
       for (let i = 0; i < paket && sesiIdx < sesiList.length; i++) {
-        spp._sesi.push(sesiList[sesiIdx]);
-        sesiIdx++;
+        spp._sesi.push(sesiList[sesiIdx]); sesiIdx++;
       }
       spp._sisa = paket - spp._sesi.length;
     });
+    // Sesi yang belum tercover pembayaran manapun
+    const sesiBelumBayar = sesiList.slice(sesiIdx);
+
+    const totalPaket = sppList.reduce((s,x) => s + Number(x.paket_sesi||0), 0);
+    const totalBayar = sppList.reduce((s,x) => s + Number(x.nominal||0), 0);
+    const sisaTotal  = totalPaket - sesiList.length;
+
+    rEl.innerHTML = `
+      <div class="grid-3" style="gap:10px">
+        <div style="text-align:center">
+          <div style="font-family:'Fredoka One',cursive;font-size:22px;color:${sisaTotal<=0?'var(--red)':'var(--green)'}">${sisaTotal}</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:700">Sisa Sesi</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'Fredoka One',cursive;font-size:22px;color:var(--purple)">${sesiList.length}/${totalPaket}</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:700">Terpakai/Dibayar</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--teal)">${fmtRp(totalBayar)}</div>
+          <div style="font-size:11px;color:var(--muted);font-weight:700">Total Bayar</div>
+        </div>
+      </div>
+      ${sesiBelumBayar.length ? `<div style="margin-top:12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:9px 12px;font-size:12px;color:var(--red);font-weight:700">⚠️ ${sesiBelumBayar.length} sesi belum tercover pembayaran: ${sesiBelumBayar.map(s=>s.tanggal).join(', ')}</div>` : ''}
+    `;
+
+    if (!sppList.length) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:14px">Belum ada riwayat pembayaran</div>';
+      return;
+    }
 
     el.innerHTML = [...sppList].reverse().map(s => `
-      <div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);font-size:13px">
+      <div style="background:var(--bg);border-radius:10px;padding:11px 13px;margin-bottom:8px;border:1px solid var(--border);font-size:13px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <div style="flex:1">
-            <div style="font-weight:800">💳 ${s.tgl_bayar} · <span style="color:var(--green)">Rp ${Number(s.nominal||0).toLocaleString('id-ID')}</span></div>
+            <div style="font-weight:800">💳 ${s.tgl_bayar} · <span style="color:var(--green)">${fmtRp(s.nominal)}</span></div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">
               📦 ${s.paket_sesi||0} sesi · sisa <b style="color:${s._sisa>0?'var(--gold2)':'var(--green)'}">${s._sisa}</b>
               ${s.keterangan ? ' · 📝 ' + s.keterangan : ''}
@@ -1024,7 +1115,7 @@ async function loadSPPMurid(muridId) {
             ${s._sesi.length ? `
             <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">
               ${s._sesi.map(ss => `<span style="background:#ECFDF5;color:var(--green);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">📅 ${ss.tanggal}</span>`).join('')}
-            </div>` : '<div style="font-size:11px;color:var(--muted);margin-top:4px">Belum ada presensi</div>'}
+            </div>` : '<div style="font-size:11px;color:var(--muted);margin-top:4px">Belum ada presensi di periode ini</div>'}
           </div>
           <button onclick="hapusSPP('${s.id}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:16px;padding:2px 6px;flex-shrink:0">🗑️</button>
         </div>
@@ -1035,15 +1126,16 @@ async function loadSPPMurid(muridId) {
   }
 }
 
+function fmtRp(n) { return 'Rp ' + Number(n||0).toLocaleString('id-ID'); }
+
 function toggleTambahSPP() {
   const f = document.getElementById('formTambahSPP');
   const show = f.style.display === 'none';
   f.style.display = show ? 'block' : 'none';
   if (show) {
-    document.getElementById('sppTglBayar').value  = new Date().toISOString().split('T')[0];
-    document.getElementById('sppNominal').value   = '';
-    document.getElementById('sppPaketSesi').value = '';
-    document.getElementById('sppKeterangan').value= '';
+    document.getElementById('sppTglBayar').value   = new Date().toISOString().split('T')[0];
+    document.getElementById('sppNominal').value    = '';
+    document.getElementById('sppKeterangan').value = '';
   }
 }
 
@@ -1051,28 +1143,29 @@ async function simpanSPP() {
   const tgl = document.getElementById('sppTglBayar').value;
   if (!tgl) return toast('Tgl bayar wajib diisi', 'error');
   try {
+    // paket_sesi tidak dikirim → backend ambil otomatis dari data murid
     await API.addSPP({
       murid_id:   currentSPPMuridId,
       tgl_bayar:  tgl,
       nominal:    document.getElementById('sppNominal').value || 0,
-      paket_sesi: document.getElementById('sppPaketSesi').value || 0,
       keterangan: document.getElementById('sppKeterangan').value,
     });
-    toast('SPP berhasil disimpan! ✅', 'success');
+    toast('Pembayaran tercatat! ✅', 'success');
     toggleTambahSPP();
+    await loadPenagihan();
     loadSPPMurid(currentSPPMuridId);
-    // Update kolom SPP di tabel murid
-    await loadMurid();
+    tabLoaded.murid = false;
   } catch(e) { toast(e.message, 'error'); }
 }
 
 async function hapusSPP(id) {
-  if (!confirm('Hapus data SPP ini?')) return;
+  if (!confirm('Hapus data pembayaran ini?')) return;
   try {
     await API.deleteSPP(id);
-    toast('SPP dihapus', 'success');
+    toast('Pembayaran dihapus', 'success');
+    await loadPenagihan();
     loadSPPMurid(currentSPPMuridId);
-    await loadMurid();
+    tabLoaded.murid = false;
   } catch(e) { toast(e.message, 'error'); }
 }
 

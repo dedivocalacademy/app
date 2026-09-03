@@ -131,6 +131,7 @@ function doGet(e) {
     const p      = e.parameter || {};
     const action = p.action;
     if (action === 'getMuridByLink') return getMuridByLink(p.link_id);
+    if (action === 'getSPPByLink')   return getSPPByLink(p.link_id);
     return err('Unknown GET action: ' + action);
   } catch(ex) { return err(ex.toString()); }
 }
@@ -224,18 +225,37 @@ function deleteGuru(id) {
 
 // ── MURID CRUD ───────────────────────────────────────────────
 
+/**
+ * Hitung info sesi murid.
+ * Total paket = akumulasi paket_sesi dari semua pembayaran SPP.
+ * Kalau murid belum punya record SPP sama sekali (data lama),
+ * fallback ke kolom paket_sesi di sheet murid.
+ * Sisa bisa NEGATIF = murid les melebihi yang sudah dibayar.
+ */
+function hitungSesiMurid(m, sesiAll, sppAll) {
+  const terpakai  = sesiAll.filter(s => String(s.murid_id) === String(m.id)).length;
+  const sppMurid  = sppAll.filter(s => String(s.murid_id) === String(m.id));
+  const totalBayar = sppMurid.reduce((sum, s) => sum + Number(s.paket_sesi || 0), 0);
+  const totalPaket = sppMurid.length ? totalBayar : Number(m.paket_sesi || 0);
+  const lastSPP    = sppMurid.sort((a,b) => String(b.tgl_bayar).localeCompare(String(a.tgl_bayar)))[0];
+  return {
+    ...m,
+    sesi_terpakai:   terpakai,
+    total_paket:     totalPaket,
+    sisa_sesi:       totalPaket - terpakai,
+    jumlah_bayar:    sppMurid.length,
+    tgl_bayar_akhir: lastSPP ? lastSPP.tgl_bayar : '',
+  };
+}
+
 function getMurid(opts) {
   let rows = sheetRows(S.MURID);
   if (opts.guru_id) rows = rows.filter(m => String(m.guru_id) === String(opts.guru_id));
   if (opts.aktif)   rows = rows.filter(m => m.aktif === opts.aktif);
 
-  // Hitung sisa sesi tiap murid
   const sesiAll = sheetRows(S.SESI);
-  rows = rows.map(m => {
-    const terpakai = sesiAll.filter(s => String(s.murid_id) === String(m.id)).length;
-    const paket    = Number(m.paket_sesi || 0);
-    return { ...m, sesi_terpakai: terpakai, sisa_sesi: Math.max(0, paket - terpakai) };
-  });
+  const sppAll  = sheetRows(S.SPP);
+  rows = rows.map(m => hitungSesiMurid(m, sesiAll, sppAll));
   return ok(rows);
 }
 
@@ -244,9 +264,18 @@ function getMuridByLink(link_id) {
   const rows  = sheetRows(S.MURID);
   const murid = rows.find(m => String(m.link_id) === String(link_id));
   if (!murid) return err('Murid tidak ditemukan');
-  const terpakai = sheetRows(S.SESI).filter(s => String(s.murid_id) === String(murid.id)).length;
-  const paket    = Number(murid.paket_sesi || 0);
-  return ok({ ...murid, sesi_terpakai: terpakai, sisa_sesi: Math.max(0, paket - terpakai) });
+  return ok(hitungSesiMurid(murid, sheetRows(S.SESI), sheetRows(S.SPP)));
+}
+
+/** Riwayat SPP + sesi untuk portal murid (akses via link_id) */
+function getSPPByLink(link_id) {
+  if (!link_id) return err('Link ID diperlukan');
+  const murid = sheetRows(S.MURID).find(m => String(m.link_id) === String(link_id));
+  if (!murid) return err('Murid tidak ditemukan');
+  const rows = sheetRows(S.SPP)
+    .filter(r => String(r.murid_id) === String(murid.id))
+    .sort((a,b) => String(b.tgl_bayar).localeCompare(String(a.tgl_bayar)));
+  return ok(rows);
 }
 
 function addMurid(d) {
@@ -299,12 +328,18 @@ function getSPP(opts) {
 
 function addSPP(d) {
   if (!d.murid_id || !d.tgl_bayar) return err('murid_id dan tgl_bayar wajib diisi');
+  // Paket sesi otomatis diambil dari data murid kalau tidak dikirim
+  let paket = Number(d.paket_sesi || 0);
+  if (!paket) {
+    const murid = sheetRows(S.MURID).find(m => String(m.id) === String(d.murid_id));
+    paket = murid ? Number(murid.paket_sesi || 0) : 0;
+  }
   const id = hexId();
   getSheet(S.SPP).appendRow([
     id, d.murid_id, d.tgl_bayar, d.nominal||0,
-    d.paket_sesi||0, d.tgl_mulai||'', d.tgl_selesai||'', d.keterangan||'',
+    paket, d.tgl_mulai||'', d.tgl_selesai||'', d.keterangan||'',
   ]);
-  return ok({ id });
+  return ok({ id, paket_sesi: paket });
 }
 
 function updateSPP(d) {
