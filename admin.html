@@ -537,6 +537,38 @@ tr:hover td{background:#FAFAF9}
 
     <div id="sppRingkasan" style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:14px;border:1.5px solid var(--border)"></div>
 
+    <!-- PENYESUAIAN MANUAL -->
+    <div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">🔧 Penyesuaian Manual</label>
+        <button onclick="toggleFormPenyesuaian()" style="background:var(--bg);border:1.5px solid var(--border);color:var(--dark);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">⚙️ Atur</button>
+      </div>
+      <div id="formPenyesuaian" style="display:none;background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:12px;padding:14px">
+        <div style="font-size:12px;color:var(--gold2);font-weight:700;margin-bottom:10px">
+          Untuk koreksi data lama atau salah input. Nilai <b>+</b> menambah sisa, <b>−</b> mengurangi.
+        </div>
+        <div class="form-row" style="align-items:flex-end">
+          <div class="form-field" style="margin-bottom:0">
+            <label>Nilai Penyesuaian</label>
+            <input type="number" id="inpPenyesuaian" placeholder="cth: 12 atau -3" oninput="updatePreviewSisa()">
+          </div>
+          <div class="form-field" style="margin-bottom:0">
+            <label>Hasil Sisa Jadi</label>
+            <input type="text" id="previewSisa" readonly style="background:var(--bg);font-weight:800">
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0">
+          <button onclick="setSisaJadi(0)" style="background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">Reset sisa → 0</button>
+          <button onclick="setSisaKePaket()" style="background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">Sisa → 1 paket penuh</button>
+          <button onclick="document.getElementById('inpPenyesuaian').value=0;updatePreviewSisa()" style="background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">Hapus penyesuaian</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="simpanPenyesuaian()" class="btn btn-primary btn-sm">💾 Simpan</button>
+          <button onclick="toggleFormPenyesuaian()" class="btn btn-dark btn-sm">Batal</button>
+        </div>
+      </div>
+    </div>
+
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Riwayat Pembayaran</label>
       <button onclick="toggleTambahSPP()" style="background:var(--teal);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">➕ Catat Pembayaran</button>
@@ -1029,7 +1061,10 @@ function renderPenagihanTable() {
       <td><b>${m.nama}</b></td>
       <td><span class="badge ${progBadgeClass(m.program)}">${m.program || '–'}</span></td>
       <td>${paket} sesi</td>
-      <td><span class="badge ${badge}" style="font-size:13px">${icon} ${sisa}</span></td>
+      <td>
+        <span class="badge ${badge}" style="font-size:13px">${icon} ${sisa}</span>
+        ${Number(m.penyesuaian||0) ? `<span title="Penyesuaian manual" style="font-size:11px;color:var(--gold2);font-weight:700;margin-left:4px">🔧${Number(m.penyesuaian)>0?'+':''}${Number(m.penyesuaian)}</span>` : ''}
+      </td>
       <td>${Number(m.sesi_terpakai||0)}</td>
       <td>${m.tgl_bayar_akhir ? `<span class="badge badge-green">${m.tgl_bayar_akhir}</span>` : '<span class="badge badge-yellow">Belum</span>'}</td>
       <td><button class="btn btn-sm btn-teal" onclick="openSPPMurid('${m.id}')">💳 Kelola</button></td>
@@ -1044,6 +1079,8 @@ async function openSPPMurid(muridId) {
   document.getElementById('sppModalSub').textContent   = (m.program || '–') + ' · paket ' + Number(m.paket_sesi||0) + ' sesi per pembayaran';
   document.getElementById('sppPaketInfo').textContent  = `📦 Akan menambah ${Number(m.paket_sesi||0)} sesi`;
   document.getElementById('formTambahSPP').style.display = 'none';
+  document.getElementById('formPenyesuaian').style.display = 'none';
+  document.getElementById('inpPenyesuaian').value = Number(m.penyesuaian || 0);
   document.getElementById('sppRingkasan').innerHTML = '';
   document.getElementById('sppHistoriList').innerHTML = '<span style="font-size:12px;color:var(--muted)">Memuat...</span>';
   openModal('modalSPP');
@@ -1076,9 +1113,11 @@ async function loadSPPMurid(muridId) {
     // Sesi yang belum tercover pembayaran manapun
     const sesiBelumBayar = sesiList.slice(sesiIdx);
 
+    const murid      = allMurid.find(x => x.id === muridId) || {};
+    const penyesuaian= Number(murid.penyesuaian || 0);
     const totalPaket = sppList.reduce((s,x) => s + Number(x.paket_sesi||0), 0);
     const totalBayar = sppList.reduce((s,x) => s + Number(x.nominal||0), 0);
-    const sisaTotal  = totalPaket - sesiList.length;
+    const sisaTotal  = totalPaket - sesiList.length + penyesuaian;
 
     rEl.innerHTML = `
       <div class="grid-3" style="gap:10px">
@@ -1095,8 +1134,10 @@ async function loadSPPMurid(muridId) {
           <div style="font-size:11px;color:var(--muted);font-weight:700">Total Bayar</div>
         </div>
       </div>
-      ${sesiBelumBayar.length ? `<div style="margin-top:12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:9px 12px;font-size:12px;color:var(--red);font-weight:700">⚠️ ${sesiBelumBayar.length} sesi belum tercover pembayaran: ${sesiBelumBayar.map(s=>s.tanggal).join(', ')}</div>` : ''}
+      ${penyesuaian ? `<div style="margin-top:10px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:9px;padding:8px 12px;font-size:12px;color:var(--gold2);font-weight:700">🔧 Penyesuaian manual: ${penyesuaian>0?'+':''}${penyesuaian} sesi</div>` : ''}
+      ${sesiBelumBayar.length ? `<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:9px 12px;font-size:12px;color:var(--red);font-weight:700">⚠️ ${sesiBelumBayar.length} sesi belum tercover pembayaran: ${sesiBelumBayar.map(s=>s.tanggal).join(', ')}</div>` : ''}
     `;
+    updatePreviewSisa();
 
     if (!sppList.length) {
       el.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:14px">Belum ada riwayat pembayaran</div>';
@@ -1127,6 +1168,69 @@ async function loadSPPMurid(muridId) {
 }
 
 function fmtRp(n) { return 'Rp ' + Number(n||0).toLocaleString('id-ID'); }
+
+// ─── PENYESUAIAN MANUAL ──────────────────────────────
+function toggleFormPenyesuaian() {
+  const f = document.getElementById('formPenyesuaian');
+  const show = f.style.display === 'none';
+  f.style.display = show ? 'block' : 'none';
+  if (show) {
+    const m = allMurid.find(x => x.id === currentSPPMuridId) || {};
+    document.getElementById('inpPenyesuaian').value = Number(m.penyesuaian || 0);
+    updatePreviewSisa();
+  }
+}
+
+/** Sisa tanpa penyesuaian = total dibayar − terpakai */
+function sisaDasar() {
+  const m = allMurid.find(x => x.id === currentSPPMuridId) || {};
+  return Number(m.sisa_sesi ?? 0) - Number(m.penyesuaian || 0);
+}
+
+function updatePreviewSisa() {
+  const inp = document.getElementById('inpPenyesuaian');
+  const out = document.getElementById('previewSisa');
+  if (!inp || !out) return;
+  const nilai = Number(inp.value || 0);
+  const hasil = sisaDasar() + nilai;
+  out.value = hasil + ' sesi';
+  out.style.color = hasil <= 0 ? 'var(--red)' : 'var(--green)';
+}
+
+function setSisaJadi(target) {
+  document.getElementById('inpPenyesuaian').value = target - sisaDasar();
+  updatePreviewSisa();
+}
+
+function setSisaKePaket() {
+  const m = allMurid.find(x => x.id === currentSPPMuridId) || {};
+  setSisaJadi(Number(m.paket_sesi || 0));
+}
+
+async function simpanPenyesuaian() {
+  const m = allMurid.find(x => x.id === currentSPPMuridId);
+  if (!m) return toast('Murid tidak ditemukan', 'error');
+  const nilai = Number(document.getElementById('inpPenyesuaian').value || 0);
+  try {
+    await API.updateMurid({
+      id:           m.id,
+      nama:         m.nama,
+      no_hp:        m.no_hp || '',
+      program:      m.program || '',
+      paket_sesi:   m.paket_sesi || 0,
+      fee_per_sesi: m.fee_per_sesi || 0,
+      guru_id:      m.guru_id || '',
+      aktif:        m.aktif || 'aktif',
+      penyesuaian:  nilai,
+    });
+    toast('Penyesuaian tersimpan! ✅', 'success');
+    document.getElementById('formPenyesuaian').style.display = 'none';
+    await loadPenagihan();
+    loadSPPMurid(currentSPPMuridId);
+    tabLoaded.murid = false;
+    tabLoaded.dashboard = false;
+  } catch(e) { toast(e.message, 'error'); }
+}
 
 function toggleTambahSPP() {
   const f = document.getElementById('formTambahSPP');
