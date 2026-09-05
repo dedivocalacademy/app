@@ -198,6 +198,12 @@ function fmt(n) {
   if (!n) return 'Rp 0';
   return 'Rp ' + Number(n).toLocaleString('id-ID');
 }
+/** yyyy-MM-dd → DD-MM-YYYY */
+function fmtTgl(t) {
+  if (!t) return '–';
+  const p = String(t).trim().split('-');
+  return p.length === 3 && p[0].length === 4 ? `${p[2]}-${p[1]}-${p[0]}` : String(t);
+}
 function progBadgeClass(prog) {
   if (!prog) return '';
   const p = prog.toLowerCase();
@@ -339,7 +345,7 @@ function kbmCardHtml(s) {
   <div class="kbm-card">
     <div class="kbm-head">
       <div>
-        <div class="kbm-tgl">📅 ${s.tanggal || '–'}</div>
+        <div class="kbm-tgl">📅 ${fmtTgl(s.tanggal)}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:2px">Guru: ${guruData ? guruData.nama : '–'}</div>
       </div>
       <span class="badge badge-teal">✓ Hadir</span>
@@ -418,7 +424,7 @@ function renderSPPContent() {
     <div class="spp-banner spp-sudah">
       <div>
         <div style="font-size:11px;opacity:.8;font-weight:700;margin-bottom:4px">Pembayaran Terakhir</div>
-        <div class="spp-val" style="font-size:22px">${lastBayar}</div>
+        <div class="spp-val" style="font-size:22px">${fmtTgl(lastBayar)}</div>
         <div class="spp-sub">${allSPP.length}× pembayaran · total ${fmt(totalRp)}</div>
       </div>
       <span style="font-size:36px">✅</span>
@@ -445,7 +451,7 @@ function renderSPPContent() {
         <div style="background:var(--bg);border-radius:10px;padding:11px 13px;margin-bottom:8px;border:1px solid var(--border)">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <div>
-              <div style="font-weight:800;font-size:14px">${s.tgl_bayar}</div>
+              <div style="font-weight:800;font-size:14px">${fmtTgl(s.tgl_bayar)}</div>
               <div style="font-size:11px;color:var(--muted);margin-top:2px">📦 ${s.paket_sesi||0} sesi${s.keterangan ? ' · ' + s.keterangan : ''}</div>
             </div>
             <div style="font-weight:800;color:var(--green);font-size:15px">${fmt(s.nominal)}</div>

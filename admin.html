@@ -575,17 +575,19 @@ tr:hover td{background:#FAFAF9}
     </div>
 
     <div id="formTambahSPP" style="display:none;background:#F0FDFA;border-radius:12px;padding:14px;margin-bottom:12px;border:1.5px solid #CCFBF1">
+      <div style="font-weight:800;font-size:14px;margin-bottom:12px" id="sppFormTitle">➕ Catat Pembayaran Baru</div>
       <div class="form-row">
         <div class="form-field"><label>Tgl Bayar</label><input type="date" id="sppTglBayar"></div>
         <div class="form-field"><label>Nominal (Rp)</label><input type="number" id="sppNominal" placeholder="0"></div>
       </div>
-      <div class="form-field" style="margin-bottom:10px">
-        <label>Keterangan (opsional)</label><input type="text" id="sppKeterangan" placeholder="cth: transfer BCA">
+      <div class="form-row">
+        <div class="form-field"><label>Jumlah Sesi</label><input type="number" id="sppPaketSesi" placeholder="cth: 4"></div>
+        <div class="form-field"><label>Keterangan (opsional)</label><input type="text" id="sppKeterangan" placeholder="cth: transfer BCA"></div>
       </div>
       <div style="font-size:12px;color:var(--teal);font-weight:700;margin-bottom:10px" id="sppPaketInfo">📦 Akan menambah – sesi</div>
       <div style="display:flex;gap:8px">
-        <button onclick="simpanSPP()" class="btn btn-primary btn-sm">💾 Simpan</button>
-        <button onclick="toggleTambahSPP()" class="btn btn-dark btn-sm">Batal</button>
+        <button onclick="simpanSPP()" class="btn btn-primary btn-sm" id="btnSimpanSPP">💾 Simpan</button>
+        <button onclick="batalFormSPP()" class="btn btn-dark btn-sm">Batal</button>
       </div>
     </div>
 
@@ -921,7 +923,7 @@ function renderMuridTable() {
       ? '<span class="badge badge-gray">Nonaktif</span>'
       : '<span class="badge badge-green">Aktif</span>';
     const sppStatus = m.tgl_bayar_akhir
-      ? `<span class="badge badge-green">✓ ${m.tgl_bayar_akhir}</span>`
+      ? `<span class="badge badge-green">✓ ${fmtTgl(m.tgl_bayar_akhir)}</span>`
       : '<span class="badge badge-yellow">Belum</span>';
     const paket = Number(m.paket_sesi || 0);
     const sisa  = Number(m.sisa_sesi  ?? 0);
@@ -1066,7 +1068,7 @@ function renderPenagihanTable() {
         ${Number(m.penyesuaian||0) ? `<span title="Penyesuaian manual" style="font-size:11px;color:var(--gold2);font-weight:700;margin-left:4px">🔧${Number(m.penyesuaian)>0?'+':''}${Number(m.penyesuaian)}</span>` : ''}
       </td>
       <td>${Number(m.sesi_terpakai||0)}</td>
-      <td>${m.tgl_bayar_akhir ? `<span class="badge badge-green">${m.tgl_bayar_akhir}</span>` : '<span class="badge badge-yellow">Belum</span>'}</td>
+      <td>${m.tgl_bayar_akhir ? `<span class="badge badge-green">${fmtTgl(m.tgl_bayar_akhir)}</span>` : '<span class="badge badge-yellow">Belum</span>'}</td>
       <td><button class="btn btn-sm btn-teal" onclick="openSPPMurid('${m.id}')">💳 Kelola</button></td>
     </tr>`;
   }).join('');
@@ -1078,6 +1080,7 @@ async function openSPPMurid(muridId) {
   document.getElementById('sppModalTitle').textContent = '💳 ' + (m.nama || 'Riwayat SPP');
   document.getElementById('sppModalSub').textContent   = (m.program || '–') + ' · paket ' + Number(m.paket_sesi||0) + ' sesi per pembayaran';
   document.getElementById('sppPaketInfo').textContent  = `📦 Akan menambah ${Number(m.paket_sesi||0)} sesi`;
+  editingSPPId = null;
   document.getElementById('formTambahSPP').style.display = 'none';
   document.getElementById('formPenyesuaian').style.display = 'none';
   document.getElementById('inpPenyesuaian').value = Number(m.penyesuaian || 0);
@@ -1100,18 +1103,22 @@ async function loadSPPMurid(muridId) {
     const sppList  = [...(sppRaw||[])].sort((a,b)  => String(a.tgl_bayar).localeCompare(String(b.tgl_bayar)));
     const sesiList = [...(sesiRaw||[])].sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
-    // Assign sesi ke tiap periode SPP secara berurutan
-    let sesiIdx = 0;
+    // Assign sesi ke periode SPP — hanya presensi SETELAH tanggal bayar
+    const claimed = new Set();
     sppList.forEach(spp => {
       const paket = Number(spp.paket_sesi || 0);
       spp._sesi = [];
-      for (let i = 0; i < paket && sesiIdx < sesiList.length; i++) {
-        spp._sesi.push(sesiList[sesiIdx]); sesiIdx++;
+      for (const s of sesiList) {
+        if (spp._sesi.length >= paket) break;
+        if (claimed.has(s.id)) continue;
+        if (String(s.tanggal) < String(spp.tgl_bayar)) continue;
+        spp._sesi.push(s);
+        claimed.add(s.id);
       }
       spp._sisa = paket - spp._sesi.length;
     });
     // Sesi yang belum tercover pembayaran manapun
-    const sesiBelumBayar = sesiList.slice(sesiIdx);
+    const sesiBelumBayar = sesiList.filter(s => !claimed.has(s.id));
 
     const murid      = allMurid.find(x => x.id === muridId) || {};
     const penyesuaian= Number(murid.penyesuaian || 0);
@@ -1135,7 +1142,7 @@ async function loadSPPMurid(muridId) {
         </div>
       </div>
       ${penyesuaian ? `<div style="margin-top:10px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:9px;padding:8px 12px;font-size:12px;color:var(--gold2);font-weight:700">🔧 Penyesuaian manual: ${penyesuaian>0?'+':''}${penyesuaian} sesi</div>` : ''}
-      ${sesiBelumBayar.length ? `<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:9px 12px;font-size:12px;color:var(--red);font-weight:700">⚠️ ${sesiBelumBayar.length} sesi belum tercover pembayaran: ${sesiBelumBayar.map(s=>s.tanggal).join(', ')}</div>` : ''}
+      ${sesiBelumBayar.length ? `<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:9px 12px;font-size:12px;color:var(--red);font-weight:700">⚠️ ${sesiBelumBayar.length} sesi belum tercover pembayaran: ${sesiBelumBayar.map(s=>fmtTgl(s.tanggal)).join(', ')}</div>` : ''}
     `;
     updatePreviewSisa();
 
@@ -1148,17 +1155,20 @@ async function loadSPPMurid(muridId) {
       <div style="background:var(--bg);border-radius:10px;padding:11px 13px;margin-bottom:8px;border:1px solid var(--border);font-size:13px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <div style="flex:1">
-            <div style="font-weight:800">💳 ${s.tgl_bayar} · <span style="color:var(--green)">${fmtRp(s.nominal)}</span></div>
+            <div style="font-weight:800">💳 ${fmtTgl(s.tgl_bayar)} · <span style="color:var(--green)">${fmtRp(s.nominal)}</span></div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">
               📦 ${s.paket_sesi||0} sesi · sisa <b style="color:${s._sisa>0?'var(--gold2)':'var(--green)'}">${s._sisa}</b>
               ${s.keterangan ? ' · 📝 ' + s.keterangan : ''}
             </div>
             ${s._sesi.length ? `
             <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">
-              ${s._sesi.map(ss => `<span style="background:#ECFDF5;color:var(--green);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">📅 ${ss.tanggal}</span>`).join('')}
+              ${s._sesi.map(ss => `<span style="background:#ECFDF5;color:var(--green);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">📅 ${fmtTgl(ss.tanggal)}</span>`).join('')}
             </div>` : '<div style="font-size:11px;color:var(--muted);margin-top:4px">Belum ada presensi di periode ini</div>'}
           </div>
-          <button onclick="hapusSPP('${s.id}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:16px;padding:2px 6px;flex-shrink:0">🗑️</button>
+          <div style="display:flex;gap:2px;flex-shrink:0">
+            <button onclick='editSPP(${JSON.stringify(s)})' style="background:none;border:none;cursor:pointer;font-size:15px;padding:2px 6px" title="Edit">✏️</button>
+            <button onclick="hapusSPP('${s.id}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:15px;padding:2px 6px" title="Hapus">🗑️</button>
+          </div>
         </div>
       </div>
     `).join('');
@@ -1168,6 +1178,13 @@ async function loadSPPMurid(muridId) {
 }
 
 function fmtRp(n) { return 'Rp ' + Number(n||0).toLocaleString('id-ID'); }
+
+/** yyyy-MM-dd → DD-MM-YYYY */
+function fmtTgl(t) {
+  if (!t) return '–';
+  const p = String(t).trim().split('-');
+  return p.length === 3 && p[0].length === 4 ? `${p[2]}-${p[1]}-${p[0]}` : String(t);
+}
 
 // ─── PENYESUAIAN MANUAL ──────────────────────────────
 function toggleFormPenyesuaian() {
@@ -1232,33 +1249,66 @@ async function simpanPenyesuaian() {
   } catch(e) { toast(e.message, 'error'); }
 }
 
+let editingSPPId = null;
+
 function toggleTambahSPP() {
   const f = document.getElementById('formTambahSPP');
-  const show = f.style.display === 'none';
+  const show = f.style.display === 'none' || editingSPPId;
+  editingSPPId = null;
   f.style.display = show ? 'block' : 'none';
   if (show) {
+    const m = allMurid.find(x => x.id === currentSPPMuridId) || {};
+    document.getElementById('sppFormTitle').textContent = '➕ Catat Pembayaran Baru';
+    document.getElementById('btnSimpanSPP').textContent = '💾 Simpan';
     document.getElementById('sppTglBayar').value   = new Date().toISOString().split('T')[0];
     document.getElementById('sppNominal').value    = '';
+    document.getElementById('sppPaketSesi').value  = Number(m.paket_sesi || 0);
     document.getElementById('sppKeterangan').value = '';
+    document.getElementById('sppPaketInfo').textContent = `📦 Akan menambah ${Number(m.paket_sesi||0)} sesi`;
   }
+}
+
+function editSPP(s) {
+  editingSPPId = s.id;
+  const f = document.getElementById('formTambahSPP');
+  f.style.display = 'block';
+  document.getElementById('sppFormTitle').textContent = '✏️ Edit Pembayaran';
+  document.getElementById('btnSimpanSPP').textContent = '💾 Update';
+  document.getElementById('sppTglBayar').value   = s.tgl_bayar || '';
+  document.getElementById('sppNominal').value    = Number(s.nominal || 0);
+  document.getElementById('sppPaketSesi').value  = Number(s.paket_sesi || 0);
+  document.getElementById('sppKeterangan').value = s.keterangan || '';
+  document.getElementById('sppPaketInfo').textContent = '📝 Mengubah data pembayaran ini';
+  f.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function batalFormSPP() {
+  editingSPPId = null;
+  document.getElementById('formTambahSPP').style.display = 'none';
 }
 
 async function simpanSPP() {
   const tgl = document.getElementById('sppTglBayar').value;
   if (!tgl) return toast('Tgl bayar wajib diisi', 'error');
+  const payload = {
+    tgl_bayar:  tgl,
+    nominal:    document.getElementById('sppNominal').value || 0,
+    paket_sesi: document.getElementById('sppPaketSesi').value || 0,
+    keterangan: document.getElementById('sppKeterangan').value,
+  };
   try {
-    // paket_sesi tidak dikirim → backend ambil otomatis dari data murid
-    await API.addSPP({
-      murid_id:   currentSPPMuridId,
-      tgl_bayar:  tgl,
-      nominal:    document.getElementById('sppNominal').value || 0,
-      keterangan: document.getElementById('sppKeterangan').value,
-    });
-    toast('Pembayaran tercatat! ✅', 'success');
-    toggleTambahSPP();
+    if (editingSPPId) {
+      await API.updateSPP({ id: editingSPPId, ...payload });
+      toast('Pembayaran diperbarui! ✅', 'success');
+    } else {
+      await API.addSPP({ murid_id: currentSPPMuridId, ...payload });
+      toast('Pembayaran tercatat! ✅', 'success');
+    }
+    batalFormSPP();
     await loadPenagihan();
     loadSPPMurid(currentSPPMuridId);
     tabLoaded.murid = false;
+    tabLoaded.dashboard = false;
   } catch(e) { toast(e.message, 'error'); }
 }
 
@@ -1356,7 +1406,7 @@ async function loadLaporan() {
         ? `<img src="${s.foto_url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer;display:block" onclick="openFotoAdmin('${s.foto_url}')" title="Lihat foto">`
         : '<span style="color:var(--muted);font-size:12px">–</span>';
       return `<tr>
-        <td>${s.tanggal || '–'}</td>
+        <td>${fmtTgl(s.tanggal)}</td>
         <td>${guru.nama || '–'}</td>
         <td><b>${murid.nama || '–'}</b></td>
         <td><span class="badge ${progBadgeClass(murid.program)}">${murid.program || '–'}</span></td>
@@ -1465,7 +1515,7 @@ async function showDetailSesi(guruId, guruNama, bulan) {
         <div>${ss.sort((a,b)=>a.tanggal>b.tanggal?1:-1).map(s => `
           <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
             <div style="display:flex;justify-content:space-between">
-              <span>📅 ${s.tanggal}</span>
+              <span>📅 ${fmtTgl(s.tanggal)}</span>
               ${s.foto_url ? `<img src="${s.foto_url}" style="width:40px;height:40px;object-fit:cover;border-radius:7px;cursor:pointer" onclick="openFotoAdmin('${s.foto_url}')">` : ''}
             </div>
             ${s.today_lesson ? `<div style="color:var(--muted);font-size:12px;margin-top:3px">📖 ${s.today_lesson}</div>` : ''}
