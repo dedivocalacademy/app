@@ -1108,22 +1108,25 @@ async function loadSPPMurid(muridId) {
     const sppList  = [...(sppRaw||[])].sort((a,b)  => String(a.tgl_bayar).localeCompare(String(b.tgl_bayar)));
     const sesiList = [...(sesiRaw||[])].sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
-    // Assign sesi ke periode SPP — hanya presensi SETELAH tanggal bayar
+    // Assign sesi ke periode SPP secara FIFO.
+    // Sesi yang tertunggak (les dulu, bayar menyusul) otomatis dilunasi
+    // oleh pembayaran berikutnya, jadi tidak ada sesi yang terlewat.
     const claimed = new Set();
+    let idx = 0;
     sppList.forEach(spp => {
       const paket = Number(spp.paket_sesi || 0);
       spp._sesi = [];
-      for (const s of sesiList) {
-        if (spp._sesi.length >= paket) break;
-        if (claimed.has(s.id)) continue;
-        if (String(s.tanggal) < String(spp.tgl_bayar)) continue;
+      while (spp._sesi.length < paket && idx < sesiList.length) {
+        const s = sesiList[idx++];
         spp._sesi.push(s);
         claimed.add(s.id);
       }
+      // Tandai sesi yang tanggalnya mendahului tanggal bayar (pelunasan tunggakan)
+      spp._tunggakan = spp._sesi.filter(s => String(s.tanggal) < String(spp.tgl_bayar)).length;
       spp._sisa = paket - spp._sesi.length;
     });
-    // Sesi yang belum tercover pembayaran manapun
-    const sesiBelumBayar = sesiList.filter(s => !claimed.has(s.id));
+    // Sesi yang belum tercover pembayaran manapun (melebihi total kuota)
+    const sesiBelumBayar = sesiList.slice(idx);
 
     const murid      = allMurid.find(x => x.id === muridId) || {};
     const penyesuaian= Number(murid.penyesuaian || 0);
@@ -1163,11 +1166,15 @@ async function loadSPPMurid(muridId) {
             <div style="font-weight:800">💳 ${fmtTgl(s.tgl_bayar)} · <span style="color:var(--green)">${fmtRp(s.nominal)}</span></div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">
               📦 ${s.paket_sesi||0} sesi · sisa <b style="color:${s._sisa>0?'var(--gold2)':'var(--green)'}">${s._sisa}</b>
+              ${s._tunggakan ? ` · <b style="color:var(--gold2)">${s._tunggakan} pelunasan tunggakan</b>` : ''}
               ${s.keterangan ? ' · 📝 ' + s.keterangan : ''}
             </div>
             ${s._sesi.length ? `
             <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">
-              ${s._sesi.map(ss => `<span style="background:#ECFDF5;color:var(--green);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">📅 ${fmtTgl(ss.tanggal)}</span>`).join('')}
+              ${s._sesi.map(ss => {
+                const telat = String(ss.tanggal) < String(s.tgl_bayar);
+                return `<span title="${telat?'Sesi sebelum tgl bayar (pelunasan tunggakan)':'Sesi setelah pembayaran'}" style="background:${telat?'#FFFBEB':'#ECFDF5'};color:${telat?'var(--gold2)':'var(--green)'};border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">${telat?'⏪':'📅'} ${fmtTgl(ss.tanggal)}</span>`;
+              }).join('')}
             </div>` : '<div style="font-size:11px;color:var(--muted);margin-top:4px">Belum ada presensi di periode ini</div>'}
           </div>
           <div style="display:flex;gap:2px;flex-shrink:0">
