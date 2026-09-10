@@ -578,13 +578,19 @@ tr:hover td{background:#FAFAF9}
       <div style="font-weight:800;font-size:14px;margin-bottom:12px" id="sppFormTitle">➕ Catat Pembayaran Baru</div>
       <div class="form-row">
         <div class="form-field"><label>Tgl Bayar</label><input type="date" id="sppTglBayar"></div>
-        <div class="form-field"><label>Nominal (Rp)</label><input type="number" id="sppNominal" placeholder="0"></div>
+        <div class="form-field"><label>Jumlah Sesi</label><input type="number" id="sppPaketSesi" placeholder="cth: 4" oninput="hitungNominalSPP()"></div>
       </div>
       <div class="form-row">
-        <div class="form-field"><label>Jumlah Sesi</label><input type="number" id="sppPaketSesi" placeholder="cth: 4"></div>
+        <div class="form-field">
+          <label>Nominal (Rp)</label>
+          <input type="number" id="sppNominal" placeholder="0" oninput="sppNominalManual=true;updateSppInfo()">
+        </div>
         <div class="form-field"><label>Keterangan (opsional)</label><input type="text" id="sppKeterangan" placeholder="cth: transfer BCA"></div>
       </div>
-      <div style="font-size:12px;color:var(--teal);font-weight:700;margin-bottom:10px" id="sppPaketInfo">📦 Akan menambah – sesi</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--teal);font-weight:700" id="sppPaketInfo">📦 –</span>
+        <button onclick="sppNominalManual=false;hitungNominalSPP()" style="background:var(--white);border:1.5px solid var(--border);border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">🔄 Hitung ulang</button>
+      </div>
       <div style="display:flex;gap:8px">
         <button onclick="simpanSPP()" class="btn btn-primary btn-sm" id="btnSimpanSPP">💾 Simpan</button>
         <button onclick="batalFormSPP()" class="btn btn-dark btn-sm">Batal</button>
@@ -1079,7 +1085,6 @@ async function openSPPMurid(muridId) {
   const m = allMurid.find(x => x.id === muridId) || {};
   document.getElementById('sppModalTitle').textContent = '💳 ' + (m.nama || 'Riwayat SPP');
   document.getElementById('sppModalSub').textContent   = (m.program || '–') + ' · paket ' + Number(m.paket_sesi||0) + ' sesi per pembayaran';
-  document.getElementById('sppPaketInfo').textContent  = `📦 Akan menambah ${Number(m.paket_sesi||0)} sesi`;
   editingSPPId = null;
   document.getElementById('formTambahSPP').style.display = 'none';
   document.getElementById('formPenyesuaian').style.display = 'none';
@@ -1249,27 +1254,52 @@ async function simpanPenyesuaian() {
   } catch(e) { toast(e.message, 'error'); }
 }
 
-let editingSPPId = null;
+let editingSPPId     = null;
+let sppNominalManual = false;
+
+/** Hitung nominal otomatis = jumlah sesi × fee per sesi murid */
+function hitungNominalSPP() {
+  const m     = allMurid.find(x => x.id === currentSPPMuridId) || {};
+  const guru  = allGuru.find(g => g.id === m.guru_id) || {};
+  const fee   = Number(m.fee_per_sesi || guru.fee_per_sesi || 0);
+  const paket = Number(document.getElementById('sppPaketSesi').value || 0);
+  if (!sppNominalManual && fee) document.getElementById('sppNominal').value = paket * fee;
+  updateSppInfo();
+}
+
+function updateSppInfo() {
+  const m     = allMurid.find(x => x.id === currentSPPMuridId) || {};
+  const guru  = allGuru.find(g => g.id === m.guru_id) || {};
+  const fee   = Number(m.fee_per_sesi || guru.fee_per_sesi || 0);
+  const paket = Number(document.getElementById('sppPaketSesi').value || 0);
+  const nom   = Number(document.getElementById('sppNominal').value || 0);
+  const el    = document.getElementById('sppPaketInfo');
+  if (!fee) { el.textContent = `📦 ${paket} sesi · fee per sesi belum diisi di data murid`; return; }
+  const auto = paket * fee;
+  el.innerHTML = `📦 ${paket} sesi × ${fmtRp(fee)} = <b>${fmtRp(auto)}</b>` +
+    (nom !== auto ? ` <span style="color:var(--gold2)">· nominal diubah manual</span>` : '');
+}
 
 function toggleTambahSPP() {
   const f = document.getElementById('formTambahSPP');
   const show = f.style.display === 'none' || editingSPPId;
-  editingSPPId = null;
+  editingSPPId     = null;
+  sppNominalManual = false;
   f.style.display = show ? 'block' : 'none';
   if (show) {
     const m = allMurid.find(x => x.id === currentSPPMuridId) || {};
     document.getElementById('sppFormTitle').textContent = '➕ Catat Pembayaran Baru';
     document.getElementById('btnSimpanSPP').textContent = '💾 Simpan';
     document.getElementById('sppTglBayar').value   = new Date().toISOString().split('T')[0];
-    document.getElementById('sppNominal').value    = '';
     document.getElementById('sppPaketSesi').value  = Number(m.paket_sesi || 0);
     document.getElementById('sppKeterangan').value = '';
-    document.getElementById('sppPaketInfo').textContent = `📦 Akan menambah ${Number(m.paket_sesi||0)} sesi`;
+    hitungNominalSPP();
   }
 }
 
 function editSPP(s) {
-  editingSPPId = s.id;
+  editingSPPId     = s.id;
+  sppNominalManual = true;   // pakai nilai tersimpan, jangan ditimpa
   const f = document.getElementById('formTambahSPP');
   f.style.display = 'block';
   document.getElementById('sppFormTitle').textContent = '✏️ Edit Pembayaran';
@@ -1278,7 +1308,7 @@ function editSPP(s) {
   document.getElementById('sppNominal').value    = Number(s.nominal || 0);
   document.getElementById('sppPaketSesi').value  = Number(s.paket_sesi || 0);
   document.getElementById('sppKeterangan').value = s.keterangan || '';
-  document.getElementById('sppPaketInfo').textContent = '📝 Mengubah data pembayaran ini';
+  updateSppInfo();
   f.scrollIntoView({ behavior:'smooth', block:'center' });
 }
 
