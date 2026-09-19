@@ -587,6 +587,11 @@ tr:hover td{background:#FAFAF9}
         </div>
         <div class="form-field"><label>Keterangan (opsional)</label><input type="text" id="sppKeterangan" placeholder="cth: transfer BCA"></div>
       </div>
+      <div class="form-field" id="wrapSppHangus" style="display:none">
+        <label>Sesi Hangus</label>
+        <input type="number" id="sppHangus" min="0" placeholder="0" oninput="updateSppInfo()">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Sesi yang tidak jadi terpakai dan haknya dilepas. Mengurangi kuota periode ini.</div>
+      </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
         <span style="font-size:12px;color:var(--teal);font-weight:700" id="sppPaketInfo">📦 –</span>
         <button onclick="sppNominalManual=false;hitungNominalSPP()" style="background:var(--white);border:1.5px solid var(--border);border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">🔄 Hitung ulang</button>
@@ -1114,23 +1119,25 @@ async function loadSPPMurid(muridId) {
     const claimed = new Set();
     let idx = 0;
     sppList.forEach(spp => {
-      const paket = Number(spp.paket_sesi || 0);
+      const paket  = Number(spp.paket_sesi || 0);
+      const hangus = Number(spp.hangus || 0);
+      const kuota  = Math.max(0, paket - hangus);   // slot yang benar-benar terpakai
       spp._sesi = [];
-      while (spp._sesi.length < paket && idx < sesiList.length) {
+      while (spp._sesi.length < kuota && idx < sesiList.length) {
         const s = sesiList[idx++];
         spp._sesi.push(s);
         claimed.add(s.id);
       }
-      // Tandai sesi yang tanggalnya mendahului tanggal bayar (pelunasan tunggakan)
-      spp._tunggakan = spp._sesi.filter(s => String(s.tanggal) < String(spp.tgl_bayar)).length;
-      spp._sisa = paket - spp._sesi.length;
+      spp._hangus = hangus;
+      spp._sisa   = kuota - spp._sesi.length;
     });
     // Sesi yang belum tercover pembayaran manapun (melebihi total kuota)
     const sesiBelumBayar = sesiList.slice(idx);
 
     const murid      = allMurid.find(x => x.id === muridId) || {};
     const penyesuaian= Number(murid.penyesuaian || 0);
-    const totalPaket = sppList.reduce((s,x) => s + Number(x.paket_sesi||0), 0);
+    const totalHangus= sppList.reduce((s,x) => s + Number(x.hangus||0), 0);
+    const totalPaket = sppList.reduce((s,x) => s + Math.max(0, Number(x.paket_sesi||0) - Number(x.hangus||0)), 0);
     const totalBayar = sppList.reduce((s,x) => s + Number(x.nominal||0), 0);
     const sisaTotal  = totalPaket - sesiList.length + penyesuaian;
 
@@ -1149,6 +1156,7 @@ async function loadSPPMurid(muridId) {
           <div style="font-size:11px;color:var(--muted);font-weight:700">Total Bayar</div>
         </div>
       </div>
+      ${totalHangus ? `<div style="margin-top:10px;background:#F9FAFB;border:1px solid var(--border);border-radius:9px;padding:8px 12px;font-size:12px;color:var(--muted);font-weight:700">🔒 ${totalHangus} sesi hangus (tidak terpakai, hak dilepas)</div>` : ''}
       ${penyesuaian ? `<div style="margin-top:10px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:9px;padding:8px 12px;font-size:12px;color:var(--gold2);font-weight:700">🔧 Penyesuaian manual: ${penyesuaian>0?'+':''}${penyesuaian} sesi</div>` : ''}
       ${sesiBelumBayar.length ? `<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:9px;padding:9px 12px;font-size:12px;color:var(--red);font-weight:700">⚠️ ${sesiBelumBayar.length} sesi belum tercover pembayaran: ${sesiBelumBayar.map(s=>fmtTgl(s.tanggal)).join(', ')}</div>` : ''}
     `;
@@ -1166,16 +1174,17 @@ async function loadSPPMurid(muridId) {
             <div style="font-weight:800">💳 ${fmtTgl(s.tgl_bayar)} · <span style="color:var(--green)">${fmtRp(s.nominal)}</span></div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">
               📦 ${s.paket_sesi||0} sesi · sisa <b style="color:${s._sisa>0?'var(--gold2)':'var(--green)'}">${s._sisa}</b>
-              ${s._tunggakan ? ` · <b style="color:var(--gold2)">${s._tunggakan} pelunasan tunggakan</b>` : ''}
+              ${s._hangus ? ` · <b style="color:var(--muted)">🔒 ${s._hangus} hangus</b>` : ''}
               ${s.keterangan ? ' · 📝 ' + s.keterangan : ''}
             </div>
             ${s._sesi.length ? `
             <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">
-              ${s._sesi.map(ss => {
-                const telat = String(ss.tanggal) < String(s.tgl_bayar);
-                return `<span title="${telat?'Sesi sebelum tgl bayar (pelunasan tunggakan)':'Sesi setelah pembayaran'}" style="background:${telat?'#FFFBEB':'#ECFDF5'};color:${telat?'var(--gold2)':'var(--green)'};border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">${telat?'⏪':'📅'} ${fmtTgl(ss.tanggal)}</span>`;
-              }).join('')}
-            </div>` : '<div style="font-size:11px;color:var(--muted);margin-top:4px">Belum ada presensi di periode ini</div>'}
+              ${s._sesi.map(ss => `<span style="background:#ECFDF5;color:var(--green);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">📅 ${fmtTgl(ss.tanggal)}</span>`).join('')}
+              ${Array.from({length:s._hangus}).map(() => `<span style="background:#F3F4F6;color:var(--muted);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;text-decoration:line-through">🔒 hangus</span>`).join('')}
+            </div>` : (s._hangus
+                ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${Array.from({length:s._hangus}).map(() => `<span style="background:#F3F4F6;color:var(--muted);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;text-decoration:line-through">🔒 hangus</span>`).join('')}</div>`
+                : '<div style="font-size:11px;color:var(--muted);margin-top:4px">Belum ada presensi di periode ini</div>')}
+            ${s._sisa > 0 ? `<button onclick="tutupPeriode('${s.id}', ${s._sisa}, ${Number(s.hangus||0)})" style="margin-top:8px;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;color:var(--muted)">🔒 Tutup periode · ${s._sisa} sesi hangus</button>` : ''}
           </div>
           <div style="display:flex;gap:2px;flex-shrink:0">
             <button onclick='editSPP(${JSON.stringify(s)})' style="background:none;border:none;cursor:pointer;font-size:15px;padding:2px 6px" title="Edit">✏️</button>
@@ -1281,10 +1290,13 @@ function updateSppInfo() {
   const paket = Number(document.getElementById('sppPaketSesi').value || 0);
   const nom   = Number(document.getElementById('sppNominal').value || 0);
   const el    = document.getElementById('sppPaketInfo');
-  if (!fee) { el.textContent = `📦 ${paket} sesi · fee per sesi belum diisi di data murid`; return; }
+  const hEl   = document.getElementById('sppHangus');
+  const hangus= (hEl && document.getElementById('wrapSppHangus').style.display !== 'none') ? Number(hEl.value || 0) : 0;
+  const hTxt  = hangus ? ` · 🔒 ${hangus} hangus → kuota ${Math.max(0, paket - hangus)}` : '';
+  if (!fee) { el.textContent = `📦 ${paket} sesi · fee per sesi belum diisi di data murid${hTxt}`; return; }
   const auto = paket * fee;
   el.innerHTML = `📦 ${paket} sesi × ${fmtRp(fee)} = <b>${fmtRp(auto)}</b>` +
-    (nom !== auto ? ` <span style="color:var(--gold2)">· nominal diubah manual</span>` : '');
+    (nom !== auto ? ` <span style="color:var(--gold2)">· nominal diubah manual</span>` : '') + hTxt;
 }
 
 function toggleTambahSPP() {
@@ -1300,6 +1312,8 @@ function toggleTambahSPP() {
     document.getElementById('sppTglBayar').value   = new Date().toISOString().split('T')[0];
     document.getElementById('sppPaketSesi').value  = Number(m.paket_sesi || 0);
     document.getElementById('sppKeterangan').value = '';
+    document.getElementById('sppHangus').value     = 0;
+    document.getElementById('wrapSppHangus').style.display = 'none';
     hitungNominalSPP();
   }
 }
@@ -1315,8 +1329,23 @@ function editSPP(s) {
   document.getElementById('sppNominal').value    = Number(s.nominal || 0);
   document.getElementById('sppPaketSesi').value  = Number(s.paket_sesi || 0);
   document.getElementById('sppKeterangan').value = s.keterangan || '';
+  document.getElementById('sppHangus').value     = Number(s.hangus || 0);
+  document.getElementById('wrapSppHangus').style.display = 'block';
   updateSppInfo();
   f.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+/** Tutup periode — sisa slot yang tidak terpakai dinyatakan hangus */
+async function tutupPeriode(sppId, sisaSlot, hangusSekarang) {
+  if (!confirm(`Tutup periode ini?\n\n${sisaSlot} sesi yang belum terpakai akan dinyatakan hangus.\nSesi berikutnya akan masuk ke pembayaran setelahnya.`)) return;
+  try {
+    await API.updateSPP({ id: sppId, hangus: Number(hangusSekarang || 0) + Number(sisaSlot) });
+    toast(`Periode ditutup · ${sisaSlot} sesi hangus`, 'success');
+    await loadPenagihan();
+    loadSPPMurid(currentSPPMuridId);
+    tabLoaded.murid = false;
+    tabLoaded.dashboard = false;
+  } catch(e) { toast(e.message, 'error'); }
 }
 
 function batalFormSPP() {
@@ -1335,6 +1364,7 @@ async function simpanSPP() {
   };
   try {
     if (editingSPPId) {
+      payload.hangus = Number(document.getElementById('sppHangus').value || 0);
       await API.updateSPP({ id: editingSPPId, ...payload });
       toast('Pembayaran diperbarui! ✅', 'success');
     } else {

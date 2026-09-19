@@ -4,11 +4,11 @@
 //  Sheet struktur:
 //    guru     → id, nama, fee_per_sesi, kode_login, aktif
 //    murid    → id, nama, no_hp, program, paket_sesi, fee_per_sesi,
-//               guru_id, link_id, aktif
+//               guru_id, link_id, aktif, penyesuaian
 //    sesi     → id, guru_id, murid_id, tanggal, bulan,
 //               today_lesson, foto_url, links, created_at
 //    spp      → id, murid_id, tgl_bayar, nominal, paket_sesi,
-//               tgl_mulai, tgl_selesai, keterangan
+//               tgl_mulai, tgl_selesai, keterangan, hangus
 //    settings → key, value
 //
 //  Deploy sebagai Web App:
@@ -89,14 +89,14 @@ function setupSheets() {
 
   const muridSh = getSheet(S.MURID);
   if (muridSh.getLastRow() === 0) {
-    muridSh.appendRow(['id','nama','no_hp','program','paket_sesi','fee_per_sesi','guru_id','link_id','aktif']);
-    muridSh.getRange(1,1,1,9).setFontWeight('bold').setBackground('#1C1026').setFontColor('#FFFFFF');
+    muridSh.appendRow(['id','nama','no_hp','program','paket_sesi','fee_per_sesi','guru_id','link_id','aktif','penyesuaian']);
+    muridSh.getRange(1,1,1,10).setFontWeight('bold').setBackground('#1C1026').setFontColor('#FFFFFF');
   }
 
   const sppSh = getSheet(S.SPP);
   if (sppSh.getLastRow() === 0) {
-    sppSh.appendRow(['id','murid_id','tgl_bayar','nominal','paket_sesi','tgl_mulai','tgl_selesai','keterangan']);
-    sppSh.getRange(1,1,1,8).setFontWeight('bold').setBackground('#1C1026').setFontColor('#FFFFFF');
+    sppSh.appendRow(['id','murid_id','tgl_bayar','nominal','paket_sesi','tgl_mulai','tgl_selesai','keterangan','hangus']);
+    sppSh.getRange(1,1,1,9).setFontWeight('bold').setBackground('#1C1026').setFontColor('#FFFFFF');
   }
 
   const sesiSh = getSheet(S.SESI);
@@ -227,22 +227,26 @@ function deleteGuru(id) {
 
 /**
  * Hitung info sesi murid.
- * Total paket = akumulasi paket_sesi dari semua pembayaran SPP.
- * Kalau murid belum punya record SPP sama sekali (data lama),
- * fallback ke kolom paket_sesi di sheet murid.
- * Sisa bisa NEGATIF = murid les melebihi yang sudah dibayar.
+ * Total paket   = akumulasi (paket_sesi − hangus) dari semua pembayaran SPP.
+ *                 Sesi hangus = hak les yang dilepas, mengurangi kuota.
+ * Penyesuaian   = koreksi manual admin (+ menambah sisa, − mengurangi).
+ *                 Dipakai untuk menetralkan sesi lama sebelum sistem SPP.
+ * Sisa = total_paket − terpakai + penyesuaian  (bisa NEGATIF)
  */
 function hitungSesiMurid(m, sesiAll, sppAll) {
-  const terpakai  = sesiAll.filter(s => String(s.murid_id) === String(m.id)).length;
-  const sppMurid  = sppAll.filter(s => String(s.murid_id) === String(m.id));
-  const totalBayar = sppMurid.reduce((sum, s) => sum + Number(s.paket_sesi || 0), 0);
+  const terpakai   = sesiAll.filter(s => String(s.murid_id) === String(m.id)).length;
+  const sppMurid   = sppAll.filter(s => String(s.murid_id) === String(m.id));
+  const totalBayar = sppMurid.reduce((sum, s) =>
+    sum + Math.max(0, Number(s.paket_sesi || 0) - Number(s.hangus || 0)), 0);
   const totalPaket = sppMurid.length ? totalBayar : Number(m.paket_sesi || 0);
+  const penyesuaian= Number(m.penyesuaian || 0);
   const lastSPP    = sppMurid.sort((a,b) => String(b.tgl_bayar).localeCompare(String(a.tgl_bayar)))[0];
   return {
     ...m,
     sesi_terpakai:   terpakai,
     total_paket:     totalPaket,
-    sisa_sesi:       totalPaket - terpakai,
+    penyesuaian:     penyesuaian,
+    sisa_sesi:       totalPaket - terpakai + penyesuaian,
     jumlah_bayar:    sppMurid.length,
     tgl_bayar_akhir: lastSPP ? lastSPP.tgl_bayar : '',
   };
@@ -283,7 +287,7 @@ function addMurid(d) {
   const id = hexId(); const link_id = hexId();
   getSheet(S.MURID).appendRow([
     id, d.nama, d.no_hp||'', d.program||'', d.paket_sesi||0,
-    d.fee_per_sesi||0, d.guru_id||'', link_id, d.aktif||'aktif',
+    d.fee_per_sesi||0, d.guru_id||'', link_id, d.aktif||'aktif', d.penyesuaian||0,
   ]);
   return ok({ id, link_id });
 }
@@ -300,6 +304,7 @@ function updateMurid(d) {
       set('program', d.program||''); set('paket_sesi', d.paket_sesi||0);
       set('fee_per_sesi', d.fee_per_sesi||0);
       set('guru_id', d.guru_id||''); set('aktif', d.aktif||'aktif');
+      if (d.penyesuaian !== undefined) set('penyesuaian', Number(d.penyesuaian) || 0);
       return ok({ updated: true });
     }
   }
@@ -337,7 +342,7 @@ function addSPP(d) {
   const id = hexId();
   getSheet(S.SPP).appendRow([
     id, d.murid_id, d.tgl_bayar, d.nominal||0,
-    paket, d.tgl_mulai||'', d.tgl_selesai||'', d.keterangan||'',
+    paket, d.tgl_mulai||'', d.tgl_selesai||'', d.keterangan||'', d.hangus||0,
   ]);
   return ok({ id, paket_sesi: paket });
 }
@@ -356,6 +361,7 @@ function updateSPP(d) {
       if (d.tgl_mulai   !== undefined) set('tgl_mulai',   d.tgl_mulai||'');
       if (d.tgl_selesai !== undefined) set('tgl_selesai', d.tgl_selesai||'');
       if (d.keterangan  !== undefined) set('keterangan',  d.keterangan||'');
+      if (d.hangus      !== undefined) set('hangus',      Number(d.hangus) || 0);
       return ok({ updated: true });
     }
   }
